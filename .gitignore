@@ -6,6 +6,9 @@
 out/
 /lib/
 
+# Mac files
+.DS_Store
+
 # Maven files
 target/
 

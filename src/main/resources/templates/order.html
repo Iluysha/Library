@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Library</title>
+    <link th:href="@{/css/styles.css}" rel="stylesheet" />
+    <link rel="icon" href="/img/icon.png" type="image/png">
+</head>
+
+<body>
+
+<div class="container">
+    <h1 th:text="${message}"></h1>
+    <a th:href="@{/books}">Back to books</a>
+    <a th:href="@{/account}">Go to orders</a>
+</div>
+</body>
+</html>

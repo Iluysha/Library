@@ -18,8 +18,8 @@
         <ul class="nav navbar-nav">
             <li><a class="nav-link active" href="/books">Library</a></li>
             <li><a class="nav-link active" href="/books">Books</a></li>
-            <li><a class="nav-link active disabled" href="/orders">Subscriptions</a></li>
-            <li><a class="nav-link active" href="/readers">Readers</a></li>
+            <li><a class="nav-link active" href="/orders">Subscriptions</a></li>
+            <li><a class="nav-link active disabled" href="/readers">Readers</a></li>
             <li><a class="nav-link active" href="/librarians">Librarians</a></li>
             <li><a class="nav-link active" href="/account">Account</a></li>
             <li><a class="nav-link active" href="/login">Login</a></li>
@@ -33,24 +33,22 @@
     <table class="table">
         <thead>
         <tr>
-            <th>Title</th>
-            <th>Author</th>
-            <th>Year</th>
-            <th>Status</th>
-            <th>Order date</th>
-            <th>Return date</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Books</th>
         </tr>
         </thead>
 
         <tbody>
-        <tr th:each="order : ${orders}">
-            <td th:text="${order.getBook().getName()}"></td>
-            <td th:text="${order.getBook().getAuthor()}"></td>
-            <td th:text="${order.getBook().getPublicationDate()}"></td>
-            <td th:if="${order.isApproved()}">On subscription</td>
-            <td th:if="${!order.isApproved()}">Pending</td>
-            <td th:text="${order.getStartDate()}"></td>
-            <td th:text="${order.getPeriod()}"></td>
+        <tr th:each="user : ${users}">
+            <td th:text="${user.getName()}"></td>
+            <td th:text="${user.getEmail()}"></td>
+            <td>
+                <form method="POST" action="/orders">
+                    <input type="hidden" name="userId" th:value="${user.getId()}"/>
+                    <button type="submit" class="btn btn-primary">Block</button>
+                </form>
+            </td>
         </tr>
         </tbody>
     </table>

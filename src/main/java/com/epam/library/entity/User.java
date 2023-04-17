@@ -20,6 +20,10 @@ public class User {
     @Column(length = 45, nullable = false)
     private String password;
 
+    @ManyToOne
+    @JoinColumn(name="role_id", nullable=false)
+    private Role role;
+
     @Column(nullable = false)
     private int fine;
 
@@ -57,5 +61,17 @@ public class User {
 
     public void setFine(int fine) {
         this.fine = fine;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 }

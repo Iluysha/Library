@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml" lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Library</title>
@@ -17,13 +17,13 @@
     <div class="container-fluid">
         <ul class="nav navbar-nav">
             <li><a class="nav-link active" href="/books">Library</a></li>
-            <li><a class="nav-link active" href="/books">Books</a></li>
+            <li><a class="nav-link active disabled" href="/books">Books</a></li>
             <li><a class="nav-link active" href="/orders">Subscriptions</a></li>
             <li><a class="nav-link active" href="/readers">Readers</a></li>
-            <li><a class="nav-link active disabled" href="/librarians">Librarians</a></li>
+            <li><a class="nav-link active" href="/librarians">Librarians</a></li>
             <li><a class="nav-link active" href="/account">Account</a></li>
             <li>
-                <form th:action="@{/logout}" method="post">
+                <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post">
                     <input type="submit" class="btn btn-link text-decoration-none" value="Logout"/>
                 </form>
             </li>
@@ -31,30 +31,11 @@
     </div>
 </nav>
 
-<div class="container">
-    <h1 class="title">My Books</h1>
-    <table class="table">
-        <thead>
-        <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Books</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        <tr th:each="user : ${users}">
-            <td th:text="${user.getName()}"></td>
-            <td th:text="${user.getEmail()}"></td>
-            <td>
-                <form method="POST" action="/orders">
-                    <input type="hidden" name="userId" th:value="${user.getId()}"/>
-                    <button type="submit" class="btn btn-primary">Block</button>
-                </form>
-            </td>
-        </tr>
-        </tbody>
-    </table>
-</div>
+<form method="POST" action="/add-book">
+    <input type="text" name="bookName"/>
+    <input type="text" name="bookAuthor"/>
+    <input type="text" name="publicationYear"/>
+    <button type="submit" class="btn btn-primary">Add</button>
+</form>
 </body>
 </html>

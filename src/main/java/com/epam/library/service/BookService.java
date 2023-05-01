@@ -2,7 +2,6 @@ package com.epam.library.service;
 
 import com.epam.library.entity.Book;
 import com.epam.library.repository.BookRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,10 +11,28 @@ import java.util.Optional;
 @Service
 public class BookService {
 
-    @Autowired
-    private BookRepository repo;
+    private final BookRepository repo;
 
-    //Add new book or update existing
+    public BookService(BookRepository repo) {
+        this.repo = repo;
+    }
+
+    //Add a copy of the book
+    public void add(Book newBook) {
+        Book book = repo.findByNameAndAuthorAndPublicationYear(newBook.getName(),
+                newBook.getAuthor(), newBook.getPublicationYear());
+
+        if(book == null) {
+            newBook.setNumOfCopies(1);
+            newBook.setAvailableCopies(1);
+            repo.save(newBook);
+        } else {
+            book.addCopy();
+            repo.save(book);
+        }
+    }
+
+    //Update existing book
     public void save(Book book) {
         repo.save(book);
     }

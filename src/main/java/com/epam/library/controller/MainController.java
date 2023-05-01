@@ -8,6 +8,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class MainController {
 
+    @GetMapping("/")
+    public String main() {
+        return "redirect:books";
+    }
+
     @GetMapping("/account")
     public String account(Model model) {
         User user = new User();
@@ -23,11 +28,6 @@ public class MainController {
 
     @GetMapping("/login")
     public String login() {
-        return "books";
-    }
-
-    @GetMapping("/logout")
-    public String logout() {
-        return "books";
+        return "login";
     }
 }

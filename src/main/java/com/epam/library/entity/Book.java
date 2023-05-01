@@ -1,6 +1,9 @@
 package com.epam.library.entity;
 
 import jakarta.persistence.*;
+
+import java.util.Objects;
+
 @Entity
 @Table(name="books")
 public class Book {
@@ -11,16 +14,16 @@ public class Book {
     private Integer id;
 
     //The title of the book
-    @Column(length = 45, nullable = false, unique = true)
+    @Column(length = 64, nullable = false, unique = true)
     private String name;
 
     //The book author´s name
-    @Column(length = 45, nullable = false)
+    @Column(length = 64, nullable = false)
     private String author;
 
     //The year of publication of the book
-    @Column(length = 15, nullable = false)
-    private String publicationDate;
+    @Column(columnDefinition = "YEAR", length = 15, nullable = false)
+    private int publicationYear;
 
     //The number of copies in this library
     @Column(nullable = false)
@@ -46,14 +49,6 @@ public class Book {
         this.author = author;
     }
 
-    public String getPublicationDate() {
-        return publicationDate;
-    }
-
-    public void setPublicationDate(String publicationDate) {
-        this.publicationDate = publicationDate;
-    }
-
     public int getNumOfCopies() {
         return numOfCopies;
     }
@@ -72,5 +67,31 @@ public class Book {
 
     public void setAvailableCopies(int availableCopies) {
         this.availableCopies = availableCopies;
+    }
+
+    public void addCopy() {
+        numOfCopies++;
+        availableCopies++;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Book book = (Book) o;
+        return Objects.equals(name, book.name) && Objects.equals(author, book.author)
+                && Objects.equals(publicationYear, book.publicationYear);
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Integer getPublicationYear() {
+        return publicationYear;
+    }
+
+    public void setPublicationYear(Integer publicationYear) {
+        this.publicationYear = publicationYear;
     }
 }

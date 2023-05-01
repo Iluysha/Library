@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Controller
@@ -60,7 +60,7 @@ public class BookController {
             Subscription subscription = new Subscription();
             subscription.setUser(userService.findById(1).get());
             subscription.setBook(book);
-            subscription.setStartDate(String.valueOf(new Date()));
+            subscription.setStartDate(LocalDateTime.now());
             subscription.setApproved(false);
             subscription.setPeriod(60);
 

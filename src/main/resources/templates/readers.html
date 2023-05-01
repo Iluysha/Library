@@ -22,8 +22,11 @@
             <li><a class="nav-link active disabled" href="/readers">Readers</a></li>
             <li><a class="nav-link active" href="/librarians">Librarians</a></li>
             <li><a class="nav-link active" href="/account">Account</a></li>
-            <li><a class="nav-link active" href="/login">Login</a></li>
-            <li><a class="nav-link active" href="/logout">Logout</a></li>
+            <li>
+                <form th:action="@{/logout}" method="post">
+                    <input type="submit" class="btn btn-link text-decoration-none" value="Logout"/>
+                </form>
+            </li>
         </ul>
     </div>
 </nav>

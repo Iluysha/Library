@@ -7,24 +7,30 @@ import jakarta.persistence.*;
 @Table(name="users")
 public class User {
 
+    public enum Role {
+        ADMIN,
+        LIBRARIAN,
+        READER;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(length = 45, nullable = false)
+    @Column(name="name", length = 64, nullable = false)
     private String name;
 
-    @Column(length = 45, nullable = false)
+    @Column(name="email", length = 255, nullable = false, unique = true)
     private String email;
 
-    @Column(length = 45, nullable = false)
+    @Column(name="password", length = 45, nullable = false)
     private String password;
 
-    @ManyToOne
-    @JoinColumn(name="role_id", nullable=false)
+    @Column(columnDefinition = "ENUM('ADMIN', 'LIBRARIAN', 'READER')")
+    @JoinColumn(name="role", nullable=false)
     private Role role;
 
-    @Column(nullable = false)
+    @Column(name="fine", nullable = false)
     private int fine;
 
     public String getName() {

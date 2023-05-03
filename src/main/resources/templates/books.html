@@ -18,10 +18,14 @@
         <div class="container-fluid">
             <ul class="nav navbar-nav">
                 <li><a class="nav-link active bg-gray" href="/books">Library</a></li>
-                <li><a class="nav-link active disabled" href="/books">Books</a></li>
-                <li><a class="nav-link active" href="/orders">Subscriptions</a></li>
-                <li><a class="nav-link active" href="/readers">Readers</a></li>
-                <li><a class="nav-link active" href="/librarians">Librarians</a></li>
+                <li><a class="nav-link disabled" href="/books">Books</a></li>
+                <li><a th:if="${#authorization.expression('hasAuthority(''ROLE_LIBRARIAN'')')}"
+                       class="nav-link active" href="/orders">Orders</a></li>
+                <li><a class="nav-link active" href="/subscriptions">Subscriptions</a></li>
+                <li><a th:if="${#authorization.expression('hasAuthority(''ROLE_LIBRARIAN'')')}"
+                       class="nav-link active" href="/readers">Readers</a></li>
+                <li><a th:if="${#authorization.expression('hasAuthority(''ROLE_ADMIN'')')}"
+                       class="nav-link active" href="/librarians">Librarians</a></li>
                 <li><a class="nav-link active" href="/account">Account</a></li>
                 <li><a class="nav-link active" sec:authorize="!isAuthenticated()" href="/login">Login</a></li>
                 <li>
@@ -35,26 +39,58 @@
 
     <div class="container">
         <h1 class="title">Books</h1>
-        <h3><a class="nav-link active" href="/add-book">Add book</a></h3>
+        <h3><a th:if="${#authorization.expression('hasAuthority(''ROLE_ADMIN'')')}"
+               class="nav-link active" href="/add-book">Add book</a></h3>
+
+        <form method="get" action="/books">
+            <label>
+                <input type="text" name="query" placeholder="Search...">
+            </label>
+            <label>
+                <select name="field">
+                    <option value="title">Title</option>
+                    <option value="author">Author</option>
+                </select>
+            </label>
+            <button type="submit">Search</button>
+        </form>
+
+        <form method="get" action="/books">
+            <label>
+                <select name="sortField">
+                    <option value="title">Title</option>
+                    <option value="author">Author</option>
+                    <option value="publicationYear">Publication year</option>
+                </select>
+            </label>
+            <label>
+                <select name="sortOrder">
+                    <option value="asc">Ascending</option>
+                    <option value="desc">Descending</option>
+                </select>
+            </label>
+            <button type="submit">Sort</button>
+        </form>
+
         <table class="table">
             <thead>
             <tr>
-                <th>Title</th>
-                <th>Author</th>
-                <th>Year</th>
+                <th><a href="?sortField=title">Title</a></th>
+                <th><a href="?sortField=author">Author</a></th>
+                <th><a href="?sortField=publicationYear">Year</a></th>
                 <th>Order</th>
             </tr>
             </thead>
 
             <tbody>
             <tr th:each="book : ${books}">
-                <td th:text="${book.name}"></td>
-                <td th:text="${book.author}"></td>
-                <td th:text="${book.publicationDate}"></td>
-                <td th:if="${book.availableCopies == 0}">No available copies</td>
-                <td th:if="${book.availableCopies > 0}">
+                <td th:text="${book.getTitle()}"></td>
+                <td th:text="${book.getAuthor()}"></td>
+                <td th:text="${book.getPublicationYear()}"></td>
+                <td th:if="${book.getAvailableCopies() == 0}">No available copies</td>
+                <td th:if="${book.getAvailableCopies() > 0}">
                     <form method="POST" action="/order">
-                        <input type="hidden" name="bookId" th:value="${book.id}"/>
+                        <input type="hidden" name="bookId" th:value="${book.getId()}"/>
                         <button type="submit" class="btn btn-primary">Order</button>
                     </form>
                 </td>
@@ -62,7 +98,37 @@
             </tbody>
         </table>
     </div>
+
+    <div class="pagination justify-content-center">
+        <ul class="pagination">
+            <li>
+                <a class="nav-link"
+                   th:classappend="${currentPage == 1}? 'disabled'"
+                   th:href="@{?pageNo=1&amp;sortField=__${sortField}__}"> &laquo; </a>
+            </li>
+            <li>
+                <a class="nav-link"
+                   th:classappend="${currentPage == 1}? 'disabled'"
+                   th:href="@{?pageNo=__${currentPage - 1}__&amp;sortField=__${sortField}__&amp;sortOrder=__${sortOrder}__}">&lsaquo;</a>
+            </li>
+            <li th:each="page : ${#numbers.sequence(1, totalPages)}">
+                <a class="nav-link"
+                   th:classappend="${currentPage == page} ? 'disabled'"
+                   th:href="@{?pageNo=__${page}__&amp;sortField=__${sortField}__&amp;sortOrder=__${sortOrder}__}"
+                   th:text="${page}"></a>
+            </li>
+            <li>
+                <a class="nav-link"
+                   th:classappend="${currentPage == totalPages} ? 'disabled'"
+                   th:href="@{?pageNo=__${currentPage + 1}__&amp;sortField=__${sortField}__&amp;sortOrder=__${sortOrder}__}">&rsaquo;</a>
+            </li>
+            <li>
+                <a class="nav-link"
+                   th:classappend="${currentPage == totalPages} ? 'disabled'"
+                   th:href="@{?pageNo=__${totalPages}__&amp;sortField=__${sortField}__&amp;sortOrder=__${sortOrder}__}">&raquo;</a>
+            </li>
+        </ul>
+    </div>
+
     </body>
 </html>
-
-

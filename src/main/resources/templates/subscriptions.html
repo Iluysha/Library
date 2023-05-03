@@ -19,8 +19,8 @@
             <li><a class="nav-link active" href="/books">Library</a></li>
             <li><a class="nav-link active" href="/books">Books</a></li>
             <li><a th:if="${#authorization.expression('hasAuthority(''ROLE_LIBRARIAN'')')}"
-                   class="nav-link active disabled" href="/orders">Orders</a></li>
-            <li><a class="nav-link active" href="/subscriptions">Subscriptions</a></li>
+                   class="nav-link active" href="/orders">Orders</a></li>
+            <li><a class="nav-link active disabled" href="/subscriptions">Subscriptions</a></li>
             <li><a th:if="${#authorization.expression('hasAuthority(''ROLE_LIBRARIAN'')')}"
                    class="nav-link active" href="/readers">Readers</a></li>
             <li><a th:if="${#authorization.expression('hasAuthority(''ROLE_ADMIN'')')}"
@@ -36,7 +36,7 @@
 </nav>
 
 <div class="container">
-    <h1 class="title">Orders</h1>
+    <h1 class="title">subscriptions</h1>
     <table class="table">
         <thead>
         <tr>
@@ -50,14 +50,16 @@
         </thead>
 
         <tbody>
-        <tr th:each="order : ${orders}">
-            <td th:text="${order.getBook().getTitle()}"></td>
-            <td th:text="${order.getBook().getAuthor()}"></td>
-            <td th:text="${order.getBook().getPublicationYear()}"></td>
-            <td th:if="${order.isApproved()}">On subscription</td>
-            <td th:if="${!order.isApproved()}">Pending</td>
-            <td th:text="${order.getStartDate()}"></td>
-            <td th:text="${order.getStartDate().plusDays(order.getPeriod())}"></td>
+        <tr th:each="subscription : ${subscriptions}">
+            <td th:text="${subscription.getBook().getTitle()}"></td>
+            <td th:text="${subscription.getBook().getAuthor()}"></td>
+            <td th:text="${subscription.getBook().getPublicationYear()}"></td>
+            <td th:if="${subscription.isApproved()}">On subscription</td>
+            <td th:if="${!subscription.isApproved()}">Pending</td>
+            <td th:text="${subscription.isApproved() ? subscription.getStartDate() : 'Pending'}"></td>
+            <td th:text="${subscription.isApproved() ?
+                subscription.getStartDate().plusDays(subscription.getPeriod()) : 'Pending'}">
+            </td>
         </tr>
         </tbody>
     </table>

@@ -17,20 +17,20 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name="name", length = 64, nullable = false)
+    @Column(length = 64, nullable = false)
     private String name;
 
-    @Column(name="email", length = 255, nullable = false, unique = true)
+    @Column(length = 255, nullable = false, unique = true)
     private String email;
 
-    @Column(name="password", length = 45, nullable = false)
+    @Column(length = 45, nullable = false)
     private String password;
 
-    @Column(columnDefinition = "ENUM('ADMIN', 'LIBRARIAN', 'READER')")
-    @JoinColumn(name="role", nullable=false)
+    @Enumerated(EnumType.STRING)
+    @Column(nullable=false)
     private Role role;
 
-    @Column(name="fine", nullable = false)
+    @Column(nullable = false)
     private int fine;
 
     public String getName() {

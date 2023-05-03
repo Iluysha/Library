@@ -18,9 +18,13 @@
         <ul class="nav navbar-nav">
             <li><a class="nav-link active" href="/books">Library</a></li>
             <li><a class="nav-link active disabled" href="/books">Books</a></li>
-            <li><a class="nav-link active" href="/orders">Subscriptions</a></li>
-            <li><a class="nav-link active" href="/readers">Readers</a></li>
-            <li><a class="nav-link active" href="/librarians">Librarians</a></li>
+            <li><a th:if="${#authorization.expression('hasAuthority(''ROLE_LIBRARIAN'')')}"
+                   class="nav-link active" href="/orders">Orders</a></li>
+            <li><a class="nav-link active" href="/subscriptions">Subscriptions</a></li>
+            <li><a th:if="${#authorization.expression('hasAuthority(''ROLE_LIBRARIAN'')')}"
+                   class="nav-link active" href="/readers">Readers</a></li>
+            <li><a th:if="${#authorization.expression('hasAuthority(''ROLE_ADMIN'')')}"
+                   class="nav-link active" href="/librarians">Librarians</a></li>
             <li><a class="nav-link active" href="/account">Account</a></li>
             <li>
                 <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post">
@@ -32,9 +36,15 @@
 </nav>
 
 <form method="POST" action="/add-book">
-    <input type="text" name="bookName"/>
-    <input type="text" name="bookAuthor"/>
-    <input type="text" name="publicationYear"/>
+    <label>
+        <input type="text" name="bookName"/>
+    </label>
+    <label>
+        <input type="text" name="bookAuthor"/>
+    </label>
+    <label>
+        <input type="text" name="publicationYear"/>
+    </label>
     <button type="submit" class="btn btn-primary">Add</button>
 </form>
 </body>

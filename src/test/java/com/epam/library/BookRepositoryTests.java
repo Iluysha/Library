@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.Rollback;
 
 @DataJpaTest
@@ -23,7 +24,7 @@ public class BookRepositoryTests {
         book.setAuthor("Erich Maria Remarque");
         book.setNumOfCopies(3);
         book.setAvailableCopies(1);
-        book.setPublicationDate("1938");
+        book.setPublicationYear(1938);
 
         Book savedBook = repo.save(book);
 
@@ -33,7 +34,7 @@ public class BookRepositoryTests {
 
     @Test
     public void testListAll() {
-        Iterable<Book> books = repo.findAll();
+        Iterable<Book> books = repo.findAll(Sort.by("name").ascending());
         Assertions.assertThat(books).hasSizeGreaterThan(0);
 
         for (Book book : books) {

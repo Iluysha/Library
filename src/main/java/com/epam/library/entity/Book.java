@@ -15,14 +15,14 @@ public class Book {
 
     //The title of the book
     @Column(length = 64, nullable = false, unique = true)
-    private String name;
+    private String title;
 
     //The book author´s name
     @Column(length = 64, nullable = false)
     private String author;
 
     //The year of publication of the book
-    @Column(columnDefinition = "YEAR", length = 15, nullable = false)
+    @Column(nullable = false)
     private int publicationYear;
 
     //The number of copies in this library
@@ -33,12 +33,12 @@ public class Book {
     @Column(nullable = false)
     private int availableCopies;
 
-    public String getName() {
-        return name;
+    public String getTitle() {
+        return title;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getAuthor() {
@@ -79,7 +79,7 @@ public class Book {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Book book = (Book) o;
-        return Objects.equals(name, book.name) && Objects.equals(author, book.author)
+        return Objects.equals(title, book.title) && Objects.equals(author, book.author)
                 && Objects.equals(publicationYear, book.publicationYear);
     }
 

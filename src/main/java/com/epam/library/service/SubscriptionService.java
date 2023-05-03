@@ -2,7 +2,6 @@ package com.epam.library.service;
 
 import com.epam.library.entity.Subscription;
 import com.epam.library.repository.SubscriptionRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,8 +10,11 @@ import java.util.List;
 @Service
 public class SubscriptionService {
 
-    @Autowired
-    private SubscriptionRepository repo;
+    private final SubscriptionRepository repo;
+
+    public SubscriptionService(SubscriptionRepository repo) {
+        this.repo = repo;
+    }
 
     public void save(Subscription subscription) {
         repo.save(subscription);
@@ -21,5 +23,9 @@ public class SubscriptionService {
     //Get a list of all subscriptions
     public List<Subscription> findAll() {
         return (List<Subscription>) repo.findAll();
+    }
+
+    public List<Subscription> findByUserEmail(String user_email) {
+        return repo.findByUserEmail(user_email);
     }
 }

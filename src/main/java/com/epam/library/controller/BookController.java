@@ -5,13 +5,18 @@ import com.epam.library.entity.Subscription;
 import com.epam.library.service.BookService;
 import com.epam.library.service.SubscriptionService;
 import com.epam.library.service.UserService;
+import org.springframework.data.domain.Page;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Controller
@@ -36,8 +41,28 @@ public class BookController {
         which prints this list with possibility of ordering.
     */
     @GetMapping("/books")
-    public String books(Model model) {
-        model.addAttribute("books", bookService.findAll());
+    public String books(@RequestParam(defaultValue = "1") int pageNo,
+                        @RequestParam(name = "sortField", defaultValue = "title") String sortField,
+                        @RequestParam(name = "sortOrder", defaultValue = "asc") String sortOrder,
+                        @RequestParam(name = "query", required = false) String query,
+                        @RequestParam(name = "field", required = false) String field,
+                        Model model) {
+
+        Page<Book> page;
+
+        if (query != null && field != null && !query.equals("")) {
+            page = bookService.searchBooks(query, field, pageNo, sortField, sortOrder);
+        } else {
+            page = bookService.getBooks(pageNo, sortField, sortOrder);
+        }
+
+        List<Book> books = page.getContent();
+
+        model.addAttribute("books", books);
+        model.addAttribute("currentPage", pageNo);
+        model.addAttribute("totalPages", Math.max(1, page.getTotalPages()));
+        model.addAttribute("sortField", sortField);
+        model.addAttribute("sortOrder", sortOrder);
 
         return "books";
     }
@@ -50,7 +75,8 @@ public class BookController {
         If there is no such a book in the library or no available copies, redirects to the error page.
     */
     @PostMapping("/order")
-    public String orderBook(@RequestParam("bookId") Integer id, Model model) {
+    public String orderBook(@AuthenticationPrincipal UserDetails userDetails,
+                            @RequestParam("bookId") Integer id, Model model) {
         Optional<Book> optionalBook = bookService.getById(id);
 
         if(optionalBook.isPresent() && optionalBook.get().getAvailableCopies() > 0) {
@@ -58,21 +84,43 @@ public class BookController {
             book.setAvailableCopies(book.getAvailableCopies() - 1);
 
             Subscription subscription = new Subscription();
-            subscription.setUser(userService.findById(1).get());
+            subscription.setUser(userService.findByEmail(userDetails.getUsername()).orElseThrow(() ->
+                    new UsernameNotFoundException("User not found")));
             subscription.setBook(book);
-            subscription.setStartDate(LocalDateTime.now());
+            subscription.setStartDate(LocalDate.now());
             subscription.setApproved(false);
             subscription.setPeriod(60);
 
             subscriptionService.save(subscription);
             bookService.save(book);
 
-            String message = "You have successfully ordered " + book.getName() + ".";
+            String message = "You have successfully ordered " + book.getTitle() + ".";
             model.addAttribute("message", message);
 
             return "order";
         } else {
             return "redirect:/error";
         }
+    }
+
+    @GetMapping("/add-book")
+    public String addBookPage() {
+        return "add-book";
+    }
+
+    @PostMapping("/add-book")
+    public String addBook(@RequestParam("bookTitle") String bookTitle,
+                          @RequestParam("bookAuthor") String bookAuthor,
+                          @RequestParam("publicationYear") String publicationYear) {
+        System.out.println(Integer.valueOf(publicationYear));
+
+        Book newBook = new Book();
+        newBook.setTitle(bookTitle);
+        newBook.setAuthor(bookAuthor);
+        newBook.setPublicationYear(Integer.valueOf(publicationYear));
+
+        bookService.add(newBook);
+
+        return "redirect:/books";
     }
 }

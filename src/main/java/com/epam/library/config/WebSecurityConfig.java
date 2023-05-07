@@ -40,7 +40,8 @@ public class WebSecurityConfig {
         http
                 .csrf().disable()
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/", "/books").permitAll()
+                        .requestMatchers("/css/**", "/img/**").permitAll()
+                        .requestMatchers("/", "/books", "/login/**").permitAll()
                         .requestMatchers("/readers/**").hasRole("LIBRARIAN")
                         .requestMatchers("/add-book", "/librarians/**").hasRole("ADMIN")
                         .anyRequest().authenticated()

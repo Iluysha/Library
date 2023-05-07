@@ -15,22 +15,35 @@
 <nav class="navbar navbar-default navbar-expand-lg bg-light">
     <div class="container-fluid">
         <ul class="nav navbar-nav">
-            <li><a class="nav-link active" href="/books">Library</a></li>
-            <li><a class="nav-link active" href="/books">Books</a></li>
+            <li><a class="nav-link active bg-gray" href="/books" th:text="#{library}">Library</a></li>
+            <li><a class="nav-link active" href="/books" th:text="#{books}">Books</a></li>
+        </ul>
+        <ul class="nav navbar-nav ml-auto">
+            <li><a class="nav-link active bg-gray ml-auto"
+                   th:href="'?lang='+#{lang_code}" th:text="#{lang}"></a>
+            </li>
         </ul>
     </div>
 </nav>
 
-<div th:if="${param.error}">
-    Invalid username and password.
+<div th:if="${param.error}" th:text="#{invalid_login}">
+    Invalid username and password
 </div>
-<div th:if="${param.logout}">
-    You have been logged out.
+<div th:if="${param.logout}" th:text="#{logged_out}">
+    You have been logged out
 </div>
 <form th:action="@{/login}" method="post">
-    <div><label> User Name : <input type="text" name="username"/> </label></div>
-    <div><label> Password: <input type="password" name="password"/> </label></div>
-    <div><input type="submit" value="Sign In"/></div>
+    <div>
+        <label for="username" th:text="#{email}">Email:</label>
+        <input type="text" id="username" name="username" required>
+    </div>
+    <div>
+        <label for="password" th:text="#{password}">Password:</label>
+        <input type="password" id="password" name="password" required>
+    </div>
+    <div>
+        <input type="submit" th:value="#{login}">
+    </div>
 </form>
 </body>
 </html>

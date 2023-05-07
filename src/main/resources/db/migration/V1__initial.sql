@@ -28,14 +28,14 @@ CREATE TABLE users (
     PRIMARY KEY (id)
 );
 
-INSERT INTO users VALUES ( 1, 'ilua.mix12@gmail.com', 0, 'Illia Mykhailichenko',
-                          '$2a$10$ttfKHWx.jX8w4K0XX4MTSOpznoOTC4Pkbnm9grlHHIURWB.xge7JG', 'ADMIN');
+INSERT INTO users VALUES ( 1, 'admin@gmail.com', 0, 'Illia Mykhailichenko',
+                          '$2a$10$dWS/En0DU8bk38TCl48bfu9uLhv9hMV2tUcspE50.wCXNn7I9hkQ6', 'ADMIN');
 
-INSERT INTO users VALUES ( 2, 'garcialorka@gmail.com', 0, 'Garcia Lorka',
-                           '$2a$10$ttfKHWx.jX8w4K0XX4MTSOpznoOTC4Pkbnm9grlHHIURWB.xge7JG', 'LIBRARIAN');
+INSERT INTO users VALUES ( 2, 'librarian@gmail.com', 0, 'Garcia Lorka',
+                           '$2a$10$dWS/En0DU8bk38TCl48bfu9uLhv9hMV2tUcspE50.wCXNn7I9hkQ6', 'LIBRARIAN');
 
-INSERT INTO users VALUES ( 3, 'franzkafka@gmail.com', 0, 'Franz Kafka',
-                           '$2a$10$ttfKHWx.jX8w4K0XX4MTSOpznoOTC4Pkbnm9grlHHIURWB.xge7JG', 'READER');
+INSERT INTO users VALUES ( 3, 'reader@gmail.com', 0, 'Franz Kafka',
+                           '$2a$10$dWS/En0DU8bk38TCl48bfu9uLhv9hMV2tUcspE50.wCXNn7I9hkQ6', 'READER');
 
 INSERT INTO books VALUES ( 1, 'Erich Maria Remarque', 1, 'Three Comrades', 3, 1936);
 INSERT INTO books VALUES ( 2, 'J. K. Rowling', 2, 'Harry Potter 1', 5, 1997);

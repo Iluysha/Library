@@ -3,7 +3,7 @@
       xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Library</title>
+    <title th:text="#{library}">Library</title>
     <link rel="icon" href="/img/icon.png" type="image/png">
 
     <link th:href="@{/css/styles.css}" rel="stylesheet" />
@@ -17,30 +17,39 @@
     <nav class="navbar navbar-default navbar-expand-lg bg-light">
         <div class="container-fluid">
             <ul class="nav navbar-nav">
-                <li><a class="nav-link active bg-gray" href="/books">Library</a></li>
-                <li><a class="nav-link disabled" href="/books">Books</a></li>
+                <li><a class="nav-link active bg-gray" href="/books" th:text="#{library}">Library</a></li>
+                <li><a class="nav-link disabled" href="/books" th:text="#{books}">Books</a></li>
                 <li><a th:if="${#authorization.expression('hasAuthority(''ROLE_LIBRARIAN'')')}"
-                       class="nav-link active" href="/orders">Orders</a></li>
-                <li><a class="nav-link active" href="/subscriptions">Subscriptions</a></li>
+                       class="nav-link active" href="/orders" th:text="#{orders}">Orders</a>
+                </li>
+                <li><a class="nav-link active" href="/subscriptions" th:text="#{subscriptions}">Subscriptions</a></li>
                 <li><a th:if="${#authorization.expression('hasAuthority(''ROLE_LIBRARIAN'')')}"
-                       class="nav-link active" href="/readers">Readers</a></li>
+                       class="nav-link active" href="/readers" th:text="#{readers}">Readers</a>
+                </li>
                 <li><a th:if="${#authorization.expression('hasAuthority(''ROLE_ADMIN'')')}"
-                       class="nav-link active" href="/librarians">Librarians</a></li>
-                <li><a class="nav-link active" href="/account">Account</a></li>
-                <li><a class="nav-link active" sec:authorize="!isAuthenticated()" href="/login">Login</a></li>
-                <li>
-                    <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post">
-                        <input type="submit" class="btn btn-link text-decoration-none" value="Logout"/>
-                    </form>
+                       class="nav-link active" href="/librarians" th:text="#{librarians}">Librarians</a>
+                </li>
+                <li><a class="nav-link active" href="/account" th:text="#{account}">Account</a></li>
+            </ul>
+            <ul class="nav navbar-nav ml-auto">
+                <li><a class="nav-link active bg-gray ml-auto"
+                       th:href="@{?pageNo=__${currentPage}__&amp;sortField=__${sortField}__&amp;sortOrder=__${sortOrder}__&amp;lang=__#{lang_code}__}"
+                       th:text="#{lang}"></a>
+                </li>
+                <li><a class="nav-link active" sec:authorize="!isAuthenticated()" href="/login"
+                       th:text="#{login}">Login</a>
+                </li>
+                <li><a class="nav-link active" sec:authorize="isAuthenticated()" href="/logout"
+                       th:text="#{logout}">Logout</a>
                 </li>
             </ul>
         </div>
     </nav>
 
     <div class="container">
-        <h1 class="title">Books</h1>
+        <h1 class="title" th:text="#{books}">Books</h1>
         <h3><a th:if="${#authorization.expression('hasAuthority(''ROLE_ADMIN'')')}"
-               class="nav-link active" href="/add-book">Add book</a></h3>
+               class="nav-link active" href="/add-book"  th:text="#{add_book}">Add book</a></h3>
 
         <form method="get" action="/books">
             <label>
@@ -48,37 +57,37 @@
             </label>
             <label>
                 <select name="field">
-                    <option value="title">Title</option>
-                    <option value="author">Author</option>
+                    <option value="title" th:text="#{title}">Title</option>
+                    <option value="author" th:text="#{author}">Author</option>
                 </select>
             </label>
-            <button type="submit">Search</button>
+            <button type="submit" th:text="#{search}">Search</button>
         </form>
 
         <form method="get" action="/books">
             <label>
                 <select name="sortField">
-                    <option value="title">Title</option>
-                    <option value="author">Author</option>
-                    <option value="publicationYear">Publication year</option>
+                    <option value="title" th:text="#{title}">Title</option>
+                    <option value="author" th:text="#{author}">Author</option>
+                    <option value="publicationYear" th:text="#{publication_year}">Publication year</option>
                 </select>
             </label>
             <label>
                 <select name="sortOrder">
-                    <option value="asc">Ascending</option>
-                    <option value="desc">Descending</option>
+                    <option value="asc" th:text="#{ascending}">Ascending</option>
+                    <option value="desc" th:text="#{descending}">Descending</option>
                 </select>
             </label>
-            <button type="submit">Sort</button>
+            <button type="submit" th:text="#{sort}">Sort</button>
         </form>
 
         <table class="table">
-            <thead>
+            <thead class="thead-light">
             <tr>
-                <th><a href="?sortField=title">Title</a></th>
-                <th><a href="?sortField=author">Author</a></th>
-                <th><a href="?sortField=publicationYear">Year</a></th>
-                <th>Order</th>
+                <th scope="col"><a href="?sortField=title" th:text="#{title}">Title</a></th>
+                <th scope="col"><a href="?sortField=author" th:text="#{author}">Author</a></th>
+                <th scope="col"><a href="?sortField=publicationYear" th:text="#{publication_year}">Publication year</a></th>
+                <th scope="col" th:text="#{order}">Order</th>
             </tr>
             </thead>
 
@@ -87,11 +96,11 @@
                 <td th:text="${book.getTitle()}"></td>
                 <td th:text="${book.getAuthor()}"></td>
                 <td th:text="${book.getPublicationYear()}"></td>
-                <td th:if="${book.getAvailableCopies() == 0}">No available copies</td>
+                <td th:if="${book.getAvailableCopies() == 0}" th:text="#{no_copies}">No available copies</td>
                 <td th:if="${book.getAvailableCopies() > 0}">
                     <form method="POST" action="/order">
                         <input type="hidden" name="bookId" th:value="${book.getId()}"/>
-                        <button type="submit" class="btn btn-primary">Order</button>
+                        <button type="submit" class="btn btn-primary" th:text="#{order}">Order</button>
                     </form>
                 </td>
             </tr>
@@ -104,7 +113,7 @@
             <li>
                 <a class="nav-link"
                    th:classappend="${currentPage == 1}? 'disabled'"
-                   th:href="@{?pageNo=1&amp;sortField=__${sortField}__}"> &laquo; </a>
+                   th:href="@{?pageNo=1&amp;sortField=__${sortField}__&amp;sortOrder=__${sortOrder}__}"> &laquo; </a>
             </li>
             <li>
                 <a class="nav-link"

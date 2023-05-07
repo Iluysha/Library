@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml" lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Library</title>
@@ -16,30 +16,39 @@
 <nav class="navbar navbar-default navbar-expand-lg bg-light">
     <div class="container-fluid">
         <ul class="nav navbar-nav">
-            <li><a class="nav-link active" href="/books">Library</a></li>
-            <li><a class="nav-link active" href="/books">Books</a></li>
+            <li><a class="nav-link active bg-gray" href="/books" th:text="#{library}">Library</a></li>
+            <li><a class="nav-link active" href="/books" th:text="#{books}">Books</a></li>
             <li><a th:if="${#authorization.expression('hasAuthority(''ROLE_LIBRARIAN'')')}"
-                   class="nav-link active" href="/orders">Orders</a></li>
-            <li><a class="nav-link active" href="/subscriptions">Subscriptions</a></li>
+                   class="nav-link active" href="/orders" th:text="#{orders}">Orders</a>
+            </li>
+            <li><a class="nav-link active" href="/subscriptions" th:text="#{subscriptions}">Subscriptions</a></li>
             <li><a th:if="${#authorization.expression('hasAuthority(''ROLE_LIBRARIAN'')')}"
-                   class="nav-link active" href="/readers">Readers</a></li>
+                   class="nav-link active" href="/readers" th:text="#{readers}">Readers</a>
+            </li>
             <li><a th:if="${#authorization.expression('hasAuthority(''ROLE_ADMIN'')')}"
-                   class="nav-link active" href="/librarians">Librarians</a></li>
-            <li><a class="nav-link active disabled" href="/account">Account</a></li>
-            <li>
-                <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post">
-                    <input type="submit" class="btn btn-link text-decoration-none" value="Logout"/>
-                </form>
+                   class="nav-link active" href="/librarians" th:text="#{librarians}">Librarians</a>
+            </li>
+            <li><a class="nav-link disabled" href="/account" th:text="#{account}">Account</a></li>
+        </ul>
+        <ul class="nav navbar-nav ml-auto">
+            <li><a class="nav-link active bg-gray ml-auto"
+                   th:href="'?lang='+#{lang_code}" th:text="#{lang}"></a>
+            </li>
+            <li><a class="nav-link active" sec:authorize="!isAuthenticated()" href="/login"
+                   th:text="#{login}">Login</a>
+            </li>
+            <li><a class="nav-link active" sec:authorize="isAuthenticated()" href="/logout"
+                   th:text="#{logout}">Logout</a>
             </li>
         </ul>
     </div>
 </nav>
 
 <div class="container">
-    <h1 class="title">My account</h1>
-    <h4 th:text="${user.name}"></h4>
-    <h4 th:text="${user.email}"></h4>
-    <h4 th:text="${user.fine}"></h4>
+    <h1 class="title" th:text="#{my_account}">My account</h1>
+    <h4 th:text="#{name}+': '+${user.name}">Not found</h4>
+    <h4 th:text="#{email}+': '+${user.email}">Not found</h4>
+    <h4 th:text="#{fine}+': '+${user.fine}">Not found</h4>
 </div>
 </body>
 </html>

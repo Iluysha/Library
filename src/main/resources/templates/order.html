@@ -28,7 +28,7 @@
             <li><a th:if="${#authorization.expression('hasAuthority(''ROLE_ADMIN'')')}"
                    class="nav-link active" href="/librarians" th:text="#{librarians}">Librarians</a>
             </li>
-            <li><a class="nav-link disabled" href="/account" th:text="#{account}">Account</a></li>
+            <li><a class="nav-link active" href="/account" th:text="#{account}">Account</a></li>
         </ul>
         <ul class="nav navbar-nav ml-auto">
             <li><a class="nav-link active bg-gray ml-auto"
@@ -44,8 +44,7 @@
     </div>
 </nav>
 
-<div class="container">
-    <h1 th:text="#{order_success}+' '+${bookTitle}">Message not found</h1>
-</div>
+<h1 class="title" th:text="#{order_success}">You have successfully ordered a book</h1>
+
 </body>
 </html>

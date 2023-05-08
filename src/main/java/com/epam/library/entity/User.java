@@ -69,10 +69,6 @@ public class User {
         this.fine = fine;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
     public Role getRole() {
         return role;
     }

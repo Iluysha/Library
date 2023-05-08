@@ -2,6 +2,8 @@ package com.epam.library.controller;
 
 import com.epam.library.entity.Book;
 import com.epam.library.service.BookService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,6 +15,8 @@ import java.util.List;
 
 @Controller
 public class BookController {
+
+    private static final Logger log = LogManager.getLogger(BookController.class);
 
     private final BookService bookService;
 
@@ -32,6 +36,9 @@ public class BookController {
                         @RequestParam(name = "query", required = false) String query,
                         @RequestParam(name = "field", required = false) String field,
                         Model model) {
+
+        log.info("Received request to fetch books. PageNo: {}, SortField: {}, SortOrder: {}, Query: {}, Field: {}",
+                pageNo, sortField, sortOrder, query, field);
 
         Page<Book> page;
 
@@ -54,6 +61,7 @@ public class BookController {
 
     @GetMapping("/add-book")
     public String addBookPage() {
+        log.info("Received request for add book page");
         return "add-book";
     }
 
@@ -61,7 +69,8 @@ public class BookController {
     public String addBook(@RequestParam("bookTitle") String bookTitle,
                           @RequestParam("bookAuthor") String bookAuthor,
                           @RequestParam("publicationYear") String publicationYear) {
-        System.out.println(Integer.valueOf(publicationYear));
+        log.info("Received request to add a book. Title: {}, Author: {}, PublicationYear: {}",
+                bookTitle, bookAuthor, publicationYear);
 
         Book newBook = new Book();
         newBook.setTitle(bookTitle);

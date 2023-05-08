@@ -26,24 +26,26 @@
     </div>
 </nav>
 
-<h5 th:if="${param.error}" th:text="#{invalid_login}">Invalid username or password</h5>
-<h5 th:if="${param.logout}" th:text="#{logged_out}">You have been logged out</h5>
-<h5 th:if="${signup}" th:text="#{success_signup}">Registration successful. Please log in</h5>
+<h5 th:if="${error}" th:text="#{registered_email}">Email already registered</h5>
 
-<form th:action="@{/login}" method="post">
+<form th:action="@{/register}" method="post">
     <div>
-        <label for="username" th:text="#{email}">Email:</label>
-        <input type="text" id="username" name="username" required>
+        <label for="name" th:text="#{name}">Name:</label>
+        <input type="text" id="name" name="name" required>
+    </div>
+    <div>
+        <label for="email" th:text="#{email}">Email:</label>
+        <input type="text" id="email" name="email" required>
     </div>
     <div>
         <label for="password" th:text="#{password}">Password:</label>
         <input type="password" id="password" name="password" required>
     </div>
     <div>
-        <input type="submit" th:value="#{login}">
+        <input type="submit" th:value="#{signup}">
     </div>
 </form>
-<h5>Don't have an account?</h5>
-<a href="/register" th:text="#{signup}"></a>
+<h5>Already have an account?</h5>
+<a href="/login" th:text="#{login}"></a>
 </body>
 </html>

@@ -13,5 +13,6 @@
 
 <body>
     <h1 class="title">Error page</h1>
+    <h3 th:if="${msg_code}" th:text="#{${msg_code}}" class="title">Error message</h3>
 </body>
 </html>

@@ -33,17 +33,23 @@ public class UserService implements UserDetailsService {
         repo.save(user);
     }
 
-    //Get a list of all users
-    public List<User> findAll() {
-        log.info("Finding all users");
+    public Optional<User> findById(Integer id) {
+        log.info("Finding user by id: {}", id);
 
-        return (List<User>) repo.findAll();
+        return repo.findById(id);
     }
 
     public Optional<User> findByEmail(String email) {
         log.info("Finding user by email: {}", email);
 
         return repo.findByEmail(email);
+    }
+
+    //Get a list of all users
+    public List<User> findAllNotAdmin() {
+        log.info("Finding all users who are not administrators");
+
+        return repo.findByRoleNot(User.Role.ADMIN);
     }
 
     @Override

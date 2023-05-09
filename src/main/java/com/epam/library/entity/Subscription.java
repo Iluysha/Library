@@ -3,7 +3,6 @@ package com.epam.library.entity;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name="subscriptions")
@@ -24,7 +23,7 @@ public class Subscription {
     @Column(name="approved", nullable = false)
     private boolean approved;
 
-    @Column(name="startDate", nullable = false)
+    @Column(name="start_date", nullable = false)
     private LocalDate startDate;
 
     @Column(name="period", nullable = false)
@@ -68,5 +67,9 @@ public class Subscription {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public Integer getId() {
+        return id;
     }
 }

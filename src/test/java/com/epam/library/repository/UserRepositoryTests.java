@@ -1,4 +1,4 @@
-package com.epam.library;
+package com.epam.library.repository;
 
 import com.epam.library.entity.User;
 import com.epam.library.repository.UserRepository;

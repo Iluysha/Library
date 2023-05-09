@@ -80,21 +80,29 @@ public class UserController {
         }
     }
 
-    @GetMapping("/readers")
+    @GetMapping("/users")
     public String readers(Model model) {
-        log.info("Handling readers request");
+        log.info("Handling users request");
 
-        model.addAttribute("users", userService.findAll());
+        model.addAttribute("users", userService.findAllNotAdmin());
 
-        return "readers";
+        return "users";
     }
 
-    @GetMapping("/librarians")
-    public String librarians(Model model) {
-        log.info("Handling librarians request");
+    @PostMapping("/block")
+    public String blockUser(@RequestParam("userId") Integer id,
+                            RedirectAttributes attributes) {
+        Optional<User> optionalUser = userService.findById(id);
 
-        model.addAttribute("librarians", userService.findAll());
+        if(optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            user.setBlocked(!user.isBlocked());
+            userService.save(user);
 
-        return "librarians";
+            return "redirect:users";
+        } else {
+            attributes.addFlashAttribute("msg_code", "user_not_found");
+            return "redirect:/error";
+        }
     }
 }

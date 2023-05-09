@@ -18,15 +18,9 @@
         <ul class="nav navbar-nav">
             <li><a class="nav-link active bg-gray" href="/books" th:text="#{library}">Library</a></li>
             <li><a class="nav-link active" href="/books" th:text="#{books}">Books</a></li>
-            <li><a th:if="${#authorization.expression('hasAuthority(''ROLE_LIBRARIAN'')')}"
-                   class="nav-link active" href="/orders" th:text="#{orders}">Orders</a>
-            </li>
             <li><a class="nav-link active" href="/subscriptions" th:text="#{subscriptions}">Subscriptions</a></li>
-            <li><a th:if="${#authorization.expression('hasAuthority(''ROLE_LIBRARIAN'')')}"
-                   class="nav-link active" href="/readers" th:text="#{readers}">Readers</a>
-            </li>
-            <li><a th:if="${#authorization.expression('hasAuthority(''ROLE_ADMIN'')')}"
-                   class="nav-link active" href="/librarians" th:text="#{librarians}">Librarians</a>
+            <li th:if="${#authorization.expression('hasAuthority(''ROLE_ADMIN'')')}">
+                <a class="nav-link active" href="/users" th:text="#{users}">Users</a>
             </li>
             <li><a class="nav-link active" href="/account" th:text="#{account}">Account</a></li>
         </ul>
@@ -45,15 +39,18 @@
 </nav>
 
 <form method="POST" action="/add-book">
-    <label>
-        <input type="text" name="bookName"/>
-    </label>
-    <label>
-        <input type="text" name="bookAuthor"/>
-    </label>
-    <label>
-        <input type="text" name="publicationYear"/>
-    </label>
+    <div>
+        <label for="bookTitle" th:text="#{title}">Title:</label>
+        <input id="bookTitle" type="text" name="bookTitle"/>
+    </div>
+    <div>
+        <label for="bookAuthor" th:text="#{author}">Author:</label>
+        <input id="bookAuthor" type="text" name="bookAuthor"/>
+    </div>
+    <div>
+        <label for="publicationYear" th:text="#{publication_year}">Publication year:</label>
+        <input id="publicationYear" type="text" name="publicationYear"/>
+    </div>
     <button type="submit" class="btn btn-primary" th:text="#{add}">Add</button>
 </form>
 </body>

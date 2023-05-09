@@ -18,17 +18,11 @@
         <ul class="nav navbar-nav">
             <li><a class="nav-link active bg-gray" href="/books" th:text="#{library}">Library</a></li>
             <li><a class="nav-link active" href="/books" th:text="#{books}">Books</a></li>
-            <li><a th:if="${#authorization.expression('hasAuthority(''ROLE_LIBRARIAN'')')}"
-                   class="nav-link disabled" href="/orders" th:text="#{orders}">Orders</a>
+            <li><a class="nav-link disabled" href="/subscriptions" th:text="#{subscriptions}">subscriptions</a></li>
+            <li th:if="${#authorization.expression('hasAuthority(''ROLE_ADMIN'')')}">
+                <a class="nav-link active" href="/users" th:text="#{users}">Users</a>
             </li>
-            <li><a class="nav-link active" href="/subscriptions" th:text="#{subscriptions}">Subscriptions</a></li>
-            <li><a th:if="${#authorization.expression('hasAuthority(''ROLE_LIBRARIAN'')')}"
-                   class="nav-link active" href="/readers" th:text="#{readers}">Readers</a>
-            </li>
-            <li><a th:if="${#authorization.expression('hasAuthority(''ROLE_ADMIN'')')}"
-                   class="nav-link active" href="/librarians" th:text="#{librarians}">Librarians</a>
-            </li>
-            <li><a class="nav-link disabled" href="/account" th:text="#{account}">Account</a></li>
+            <li><a class="nav-link active" href="/account" th:text="#{account}">Account</a></li>
         </ul>
         <ul class="nav navbar-nav ml-auto">
             <li><a class="nav-link active bg-gray ml-auto"
@@ -45,13 +39,15 @@
 </nav>
 
 <div class="container">
-    <h1 class="title">Orders</h1>
+    <h1 class="title" th:text="#{subscriptions}">subscriptions</h1>
     <table class="table">
         <thead class="thead-light">
         <tr>
             <th th:text="#{title}">Title</th>
             <th th:text="#{author}">Author</th>
             <th th:text="#{publication_year}">Publication year</th>
+            <th th:text="#{name}">Name</th>
+            <th th:text="#{email}">Email</th>
             <th th:text="#{status}">Status</th>
             <th th:text="#{order_date}">Order date</th>
             <th th:text="#{return_date}">Return date</th>
@@ -59,14 +55,22 @@
         </thead>
 
         <tbody>
-        <tr th:each="order : ${orders}">
-            <td th:text="${order.getBook().getTitle()}"></td>
-            <td th:text="${order.getBook().getAuthor()}"></td>
-            <td th:text="${order.getBook().getPublicationYear()}"></td>
-            <td th:if="${order.isApproved()}">On subscription</td>
-            <td th:if="${!order.isApproved()}">Pending</td>
-            <td th:text="${order.getStartDate()}"></td>
-            <td th:text="${order.getStartDate().plusDays(order.getPeriod())}"></td>
+        <tr th:each="subscription : ${subscriptions}">
+            <td th:text="${subscription.getBook().getTitle()}"></td>
+            <td th:text="${subscription.getBook().getAuthor()}"></td>
+            <td th:text="${subscription.getBook().getPublicationYear()}"></td>
+            <td th:text="${subscription.getUser().getName()}"></td>
+            <td th:text="${subscription.getUser().getEmail()}"></td>
+            <td th:if="${subscription.isApproved()}" th:text="#{approved}"></td>
+            <td th:if="${!subscription.isApproved()}">
+                <form method="POST" action="/approve">
+                    <input type="hidden" name="subscriptionId" th:value="${subscription.getId()}"/>
+                    <button type="submit" class="btn btn-primary" th:text="#{approve}">Approve</button>
+                </form>
+            </td>
+            <td th:text="${subscription.isApproved()} ? ${subscription.getStartDate()} : #{pending}"></td>
+            <td th:text="${subscription.isApproved()} ?
+            ${subscription.getStartDate().plusDays(subscription.getPeriod())}  : #{pending}">
         </tr>
         </tbody>
     </table>

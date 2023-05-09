@@ -1,6 +1,5 @@
 package com.epam.library.entity;
 
-
 import jakarta.persistence.*;
 
 @Entity
@@ -10,7 +9,7 @@ public class User {
     public enum Role {
         ADMIN,
         LIBRARIAN,
-        READER;
+        READER
     }
 
     @Id
@@ -32,6 +31,9 @@ public class User {
 
     @Column(nullable = false)
     private int fine;
+
+    @Column(nullable = false)
+    private boolean blocked;
 
     public String getName() {
         return name;
@@ -75,5 +77,13 @@ public class User {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    public boolean isBlocked() {
+        return blocked;
+    }
+
+    public void setBlocked(boolean blocked) {
+        this.blocked = blocked;
     }
 }

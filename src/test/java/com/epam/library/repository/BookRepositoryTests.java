@@ -1,7 +1,6 @@
-package com.epam.library;
+package com.epam.library.repository;
 
 import com.epam.library.entity.Book;
-import com.epam.library.repository.BookRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +19,7 @@ public class BookRepositoryTests {
     @Test
     public void testAddNew() {
         Book book = new Book();
-        book.setName("Three Comrades");
+        book.setTitle("Three Comrades");
         book.setAuthor("Erich Maria Remarque");
         book.setNumOfCopies(3);
         book.setAvailableCopies(1);

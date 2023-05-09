@@ -19,7 +19,8 @@ import java.util.Optional;
 public class BookService {
 
     private static final Logger log = LogManager.getLogger(BookController.class);
-    private final int PAGE_SIZE = 3;
+    private final int PAGE_SIZE = 5;
+
     private final BookRepository repo;
 
     public BookService(BookRepository repo) {

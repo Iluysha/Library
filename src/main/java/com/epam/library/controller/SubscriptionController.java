@@ -35,33 +35,21 @@ public class SubscriptionController {
         this.subscriptionService = subscriptionService;
     }
 
-    /*
-        Method, handling get request to the /subscriptions URL.
-    */
     @GetMapping("/subscriptions")
     public String subscriptions(@AuthenticationPrincipal UserDetails userDetails, Model model) {
         log.info("Handling subscriptions request for user: {}", userDetails.getUsername());
 
         if(userDetails.getAuthorities().stream().anyMatch(authority ->
-                authority.getAuthority().equals("ROLE_LIBRARIAN"))) {
+                authority.getAuthority().equals("ROLE_LIBRARIAN") ||
+                        authority.getAuthority().equals("ROLE_ADMIN"))) {
             model.addAttribute("subscriptions",
                     subscriptionService.findAll());
+            return "librarian_subscriptions";
         } else {
             model.addAttribute("subscriptions",
                     subscriptionService.findByUserEmail(userDetails.getUsername()));
+            return "reader_subscriptions";
         }
-
-        return "subscriptions";
-    }
-
-    @GetMapping("/orders")
-    public String orders(@AuthenticationPrincipal UserDetails userDetails, Model model) {
-        log.info("Handling orders request for user: {}", userDetails.getUsername());
-
-        model.addAttribute("orders",
-                subscriptionService.findByUserEmail(userDetails.getUsername()));
-
-        return "orders";
     }
 
     @GetMapping("/order")
@@ -109,7 +97,29 @@ public class SubscriptionController {
                     userDetails.getUsername(), id);
 
             attributes.addFlashAttribute("msg_code", "no_such_book");
-            return "redirect:/error";
+            return "redirect:error";
+        }
+    }
+
+    @PostMapping("/approve")
+    public String approveSubscription(@AuthenticationPrincipal UserDetails userDetails,
+                            @RequestParam("subscriptionId") Integer id,
+                            RedirectAttributes attributes) {
+        log.info("Processing approve request for subscription id: {}", id);
+
+        Optional<Subscription> optionalSubscription = subscriptionService.findById(id);
+
+        if(optionalSubscription.isPresent() && !optionalSubscription.get().isApproved()) {
+            Subscription subscription = optionalSubscription.get();
+            subscription.setApproved(true);
+            subscriptionService.save(subscription);
+
+            log.info("Subscription with id: {} successfully approved", id);
+            return "redirect:subscriptions";
+        } else {
+            log.warn("Failed to approve subscription with id:  {}", id);
+            attributes.addFlashAttribute("msg_code", "cant_approve");
+            return "redirect:error";
         }
     }
 }

@@ -18,15 +18,9 @@
         <ul class="nav navbar-nav">
             <li><a class="nav-link active bg-gray" href="/books" th:text="#{library}">Library</a></li>
             <li><a class="nav-link active" href="/books" th:text="#{books}">Books</a></li>
-            <li><a th:if="${#authorization.expression('hasAuthority(''ROLE_LIBRARIAN'')')}"
-                   class="nav-link active" href="/orders" th:text="#{orders}">Orders</a>
-            </li>
             <li><a class="nav-link active" href="/subscriptions" th:text="#{subscriptions}">Subscriptions</a></li>
-            <li><a th:if="${#authorization.expression('hasAuthority(''ROLE_LIBRARIAN'')')}"
-                   class="nav-link disabled" href="/readers" th:text="#{readers}">Readers</a>
-            </li>
-            <li><a th:if="${#authorization.expression('hasAuthority(''ROLE_ADMIN'')')}"
-                   class="nav-link active" href="/librarians" th:text="#{librarians}">Librarians</a>
+            <li th:if="${#authorization.expression('hasAuthority(''ROLE_ADMIN'')')}">
+                <a class="nav-link disables" href="/users" th:text="#{users}">Users</a>
             </li>
             <li><a class="nav-link active" href="/account" th:text="#{account}">Account</a></li>
         </ul>
@@ -45,13 +39,14 @@
 </nav>
 
 <div class="container">
-    <h1 class="title">My Books</h1>
+    <h1 class="title" th:text="#{users}">Users</h1>
     <table class="table">
         <thead class="thead-light">
         <tr>
             <th th:text="#{name}">Name</th>
             <th th:text="#{email}">Email</th>
-            <th th:text="#{books}">Books</th>
+            <th th:text="#{role}">Role</th>
+            <th th:text="#{manage}">Manage</th>
         </tr>
         </thead>
 
@@ -59,10 +54,12 @@
         <tr th:each="user : ${users}">
             <td th:text="${user.getName()}"></td>
             <td th:text="${user.getEmail()}"></td>
+            <td th:text="${user.getRole()}"></td>
             <td>
-                <form method="POST" action="/orders">
+                <form method="POST" action="/block">
                     <input type="hidden" name="userId" th:value="${user.getId()}"/>
-                    <button type="submit" class="btn btn-primary" th:text="#{block}">Block</button>
+                    <button type="submit" class="btn btn-primary"
+                            th:text="${user.isBlocked()} ? #{unlock} : #{block}"></button>
                 </form>
             </td>
         </tr>

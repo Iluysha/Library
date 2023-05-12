@@ -39,7 +39,7 @@ public class UserController {
         log.info("Registering user with email: {}", email);
 
         // Check if the email is already registered
-        if(userService.register(name, email, password)) {
+        if(userService.register(name, email, password) != null) {
             attributes.addFlashAttribute("error", true);
             return "redirect:/register";
         } else {
@@ -77,7 +77,7 @@ public class UserController {
                             RedirectAttributes attributes) {
         log.info("Blocking user with ID: {}", id);
 
-        if(userService.blockUser(id)) {
+        if(userService.blockUser(id) != null) {
             return "redirect:users";
         } else {
             log.warn("User {} not found", id);

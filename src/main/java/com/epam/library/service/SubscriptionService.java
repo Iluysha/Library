@@ -50,7 +50,7 @@ public class SubscriptionService {
         return (List<Subscription>) repo.findAll();
     }
 
-    public boolean orderBook(UserDetails userDetails, Integer id) {
+    public Subscription orderBook(UserDetails userDetails, Integer id) {
         log.info("Order book id: {} for user: {}", userDetails.getUsername(), id);
 
         Optional<User> optionalUser = userService.findByEmail(userDetails.getUsername());
@@ -74,20 +74,20 @@ public class SubscriptionService {
                 bookService.save(book);
 
                 log.info("Order placed successfully for user: {} and book: {}", user.getName(), book.getTitle());
-                return true;
+                return subscription;
             } else {
                 log.warn("Failed to place order for user: {} and book: {}. No such book or no available copies.",
                         userDetails.getUsername(), id);
-                return false;
+                return null;
             }
         } else {
             log.warn("Failed to place order for user: {} and book: {}. No such book or no available copies.",
                     userDetails.getUsername(), id);
-            return false;
+            return null;
         }
     }
 
-    public boolean approveSubscription(Integer id) {
+    public Subscription approveSubscription(Integer id) {
         Optional<Subscription> optionalSubscription = findById(id);
 
         if(optionalSubscription.isPresent() && !optionalSubscription.get().isApproved()) {
@@ -96,10 +96,10 @@ public class SubscriptionService {
             save(subscription);
 
             log.info("Subscription with id: {} successfully approved", id);
-            return true;
+            return subscription;
         } else {
             log.warn("Failed to approve subscription with id:  {}", id);
-            return false;
+            return null;
         }
     }
 }

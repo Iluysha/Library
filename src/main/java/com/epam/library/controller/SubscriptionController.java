@@ -56,7 +56,7 @@ public class SubscriptionController {
     public String orderBook(@AuthenticationPrincipal UserDetails userDetails,
                             @RequestParam("bookId") Integer id,
                             RedirectAttributes attributes) {
-        if(subscriptionService.orderBook(userDetails, id)) {
+        if(subscriptionService.orderBook(userDetails, id) != null) {
             return "redirect:order";
         } else {
             log.warn("No book with id: {}", id);
@@ -70,7 +70,7 @@ public class SubscriptionController {
                                       RedirectAttributes attributes) {
         log.info("Processing approve request for subscription id: {}", id);
 
-        if(subscriptionService.approveSubscription(id)) {
+        if(subscriptionService.approveSubscription(id) != null) {
             return "redirect:subscriptions";
         } else {
             log.warn("Failed to approve subscription with id:  {}", id);

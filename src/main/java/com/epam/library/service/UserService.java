@@ -45,14 +45,14 @@ public class UserService implements UserDetailsService {
         repo.save(user);
     }
 
-    public boolean register(@RequestParam("name") String name,
+    public User register(@RequestParam("name") String name,
                          @RequestParam("email") String email,
                          @RequestParam("password") String password) {
         log.info("Registering user with email: {}", email);
 
         if(findByEmail(email).isPresent()) {
             log.info("Email {} already registered", email);
-            return false;
+            return null;
         } else {
             // Create a new user object
             User user = new User();
@@ -65,7 +65,7 @@ public class UserService implements UserDetailsService {
             save(user);
 
             log.info("User registered successfully: {}", user);
-            return true;
+            return user;
         }
     }
 
@@ -75,7 +75,7 @@ public class UserService implements UserDetailsService {
         return repo.findByRoleNot(User.Role.ADMIN);
     }
 
-    public boolean blockUser(Integer id) {
+    public User blockUser(Integer id) {
         Optional<User> optionalUser = findById(id);
 
         if(optionalUser.isPresent()) {
@@ -84,10 +84,10 @@ public class UserService implements UserDetailsService {
             save(user);
 
             log.info("User {} blocked", user);
-            return true;
+            return user;
         } else {
             log.info("User {} not found", id);
-            return false;
+            return null;
         }
     }
 

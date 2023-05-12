@@ -27,7 +27,7 @@ public class BookService {
     }
 
     //Add a copy of the book
-    public void add(String bookTitle, String bookAuthor, String publicationYear) {
+    public Book add(String bookTitle, String bookAuthor, String publicationYear) {
         log.info("Adding a book. Title: {}, Author: {}, PublicationYear: {}",
                 bookTitle, bookAuthor, publicationYear);
 
@@ -40,6 +40,8 @@ public class BookService {
             Book book = optionalBook.get();
             book.addCopy();
             repo.save(book);
+
+            return book;
         } else {
             log.info("Adding a new book: {}", bookTitle);
 
@@ -51,13 +53,14 @@ public class BookService {
             newBook.setAvailableCopies(1);
 
             repo.save(newBook);
+
+            return newBook;
         }
     }
 
     //Update existing book
     public void save(Book book) {
         log.info("Saving book: {}", book);
-
         repo.save(book);
     }
 

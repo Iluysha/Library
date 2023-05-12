@@ -38,20 +38,20 @@
     </div>
 </nav>
 
-<form method="POST" action="/add-book">
-    <div>
-        <label for="bookTitle" th:text="#{title}">Title:</label>
+<form method="POST" action="/add-book" class="m-4">
+    <div class="my-2">
+        <label for="bookTitle" th:text="#{title} + ':'">Title:</label>
         <input id="bookTitle" type="text" name="bookTitle"/>
     </div>
-    <div>
-        <label for="bookAuthor" th:text="#{author}">Author:</label>
+    <div class="my-2">
+        <label for="bookAuthor" th:text="#{author} + ':'">Author:</label>
         <input id="bookAuthor" type="text" name="bookAuthor"/>
     </div>
-    <div>
-        <label for="publicationYear" th:text="#{publication_year}">Publication year:</label>
+    <div class="my-2">
+        <label for="publicationYear" th:text="#{publication_year} + ':'">Publication year:</label>
         <input id="publicationYear" type="text" name="publicationYear"/>
     </div>
-    <button type="submit" class="btn btn-primary" th:text="#{add}">Add</button>
+    <button type="submit" class="btn btn-primary my-2" th:text="#{add}">Add</button>
 </form>
 </body>
 </html>

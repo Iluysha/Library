@@ -1,15 +1,10 @@
 package com.epam.library.controller;
 
-import com.epam.library.entity.Book;
-import com.epam.library.entity.Subscription;
-import com.epam.library.service.BookService;
 import com.epam.library.service.SubscriptionService;
-import com.epam.library.service.UserService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,21 +12,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.time.LocalDate;
-import java.util.Optional;
-
 @Controller
 public class SubscriptionController {
 
-    private static final Logger log = LogManager.getLogger(BookController.class);
-    private final UserService userService;
-    private final BookService bookService;
+    private static final Logger log = LogManager.getLogger(SubscriptionController.class);
     private final SubscriptionService subscriptionService;
 
-    public SubscriptionController(UserService userService, BookService bookService,
-                                  SubscriptionService subscriptionService) {
-        this.userService = userService;
-        this.bookService = bookService;
+    public SubscriptionController(SubscriptionService subscriptionService) {
         this.subscriptionService = subscriptionService;
     }
 
@@ -55,7 +42,6 @@ public class SubscriptionController {
     @GetMapping("/order")
     public String orderSuccess() {
         log.info("Handling order success request");
-
         return "order";
     }
 
@@ -70,51 +56,21 @@ public class SubscriptionController {
     public String orderBook(@AuthenticationPrincipal UserDetails userDetails,
                             @RequestParam("bookId") Integer id,
                             RedirectAttributes attributes) {
-        log.info("Processing order request for user: {} and book id: {}", userDetails.getUsername(), id);
-
-        Optional<Book> optionalBook = bookService.getById(id);
-
-        if(optionalBook.isPresent() && optionalBook.get().getAvailableCopies() > 0) {
-            Book book = optionalBook.get();
-            book.setAvailableCopies(book.getAvailableCopies() - 1);
-
-            Subscription subscription = new Subscription();
-            subscription.setUser(userService.findByEmail(userDetails.getUsername()).orElseThrow(() ->
-                    new UsernameNotFoundException("User not found")));
-            subscription.setBook(book);
-            subscription.setStartDate(LocalDate.now());
-            subscription.setApproved(false);
-            subscription.setPeriod(60);
-
-            subscriptionService.save(subscription);
-            bookService.save(book);
-
-            log.info("Order placed successfully for user: {} and book id: {}", userDetails.getUsername(), id);
-
+        if(subscriptionService.orderBook(userDetails, id)) {
             return "redirect:order";
         } else {
-            log.warn("Failed to place order for user: {} and book id: {}. No such book or no available copies.",
-                    userDetails.getUsername(), id);
-
+            log.warn("No book with id: {}", id);
             attributes.addFlashAttribute("msg_code", "no_such_book");
             return "redirect:error";
         }
     }
 
     @PostMapping("/approve")
-    public String approveSubscription(@AuthenticationPrincipal UserDetails userDetails,
-                            @RequestParam("subscriptionId") Integer id,
-                            RedirectAttributes attributes) {
+    public String approveSubscription(@RequestParam("subscriptionId") Integer id,
+                                      RedirectAttributes attributes) {
         log.info("Processing approve request for subscription id: {}", id);
 
-        Optional<Subscription> optionalSubscription = subscriptionService.findById(id);
-
-        if(optionalSubscription.isPresent() && !optionalSubscription.get().isApproved()) {
-            Subscription subscription = optionalSubscription.get();
-            subscription.setApproved(true);
-            subscriptionService.save(subscription);
-
-            log.info("Subscription with id: {} successfully approved", id);
+        if(subscriptionService.approveSubscription(id)) {
             return "redirect:subscriptions";
         } else {
             log.warn("Failed to approve subscription with id:  {}", id);

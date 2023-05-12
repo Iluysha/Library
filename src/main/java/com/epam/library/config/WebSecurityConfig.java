@@ -8,8 +8,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -21,16 +19,12 @@ public class WebSecurityConfig {
     public WebSecurityConfig(UserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
     }
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
 
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
         return http.getSharedObject(AuthenticationManagerBuilder.class)
                 .userDetailsService(userDetailsService)
-                .passwordEncoder(passwordEncoder())
+                .passwordEncoder(PasswordEncoderConfig.passwordEncoder())
                 .and()
                 .build();
     }
@@ -40,8 +34,8 @@ public class WebSecurityConfig {
         http
                 .csrf().disable()
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/css/**", "/img/**").permitAll()
-                        .requestMatchers("/", "/books", "/login/**", "/register/**").permitAll()
+                        .requestMatchers("/css/**", "/img/**", "/", "/books", "/login/**",
+                                "/register/**", "/error").permitAll()
                         .requestMatchers("/add-book", "/users", "/block").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )

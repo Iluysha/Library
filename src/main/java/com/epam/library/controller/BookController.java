@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.List;
-
 @Controller
 public class BookController {
 
@@ -37,20 +35,9 @@ public class BookController {
                         @RequestParam(name = "field", required = false) String field,
                         Model model) {
 
-        log.info("Received request to fetch books. PageNo: {}, SortField: {}, SortOrder: {}, Query: {}, Field: {}",
-                pageNo, sortField, sortOrder, query, field);
+        Page<Book> page = bookService.getBooks(query, field, pageNo, sortField, sortOrder);
 
-        Page<Book> page;
-
-        if (query != null && field != null && !query.equals("")) {
-            page = bookService.searchBooks(query, field, pageNo, sortField, sortOrder);
-        } else {
-            page = bookService.getBooks(pageNo, sortField, sortOrder);
-        }
-
-        List<Book> books = page.getContent();
-
-        model.addAttribute("books", books);
+        model.addAttribute("books", page.getContent());
         model.addAttribute("currentPage", pageNo);
         model.addAttribute("totalPages", Math.max(1, page.getTotalPages()));
         model.addAttribute("sortField", sortField);
@@ -69,16 +56,7 @@ public class BookController {
     public String addBook(@RequestParam("bookTitle") String bookTitle,
                           @RequestParam("bookAuthor") String bookAuthor,
                           @RequestParam("publicationYear") String publicationYear) {
-        log.info("Received request to add a book. Title: {}, Author: {}, PublicationYear: {}",
-                bookTitle, bookAuthor, publicationYear);
-
-        Book newBook = new Book();
-        newBook.setTitle(bookTitle);
-        newBook.setAuthor(bookAuthor);
-        newBook.setPublicationYear(Integer.valueOf(publicationYear));
-
-        bookService.add(newBook);
-
+        bookService.add(bookTitle, bookAuthor, publicationYear);
         return "redirect:/books";
     }
 }

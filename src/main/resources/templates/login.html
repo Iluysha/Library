@@ -30,20 +30,18 @@
 <h5 th:if="${param.logout}" th:text="#{logged_out}">You have been logged out</h5>
 <h5 th:if="${signup}" th:text="#{success_signup}">Registration successful. Please log in</h5>
 
-<form th:action="@{/login}" method="post">
-    <div>
+<form th:action="@{/login}" method="post" class="m-4">
+    <div class="my-2">
         <label for="username" th:text="#{email}">Email:</label>
         <input type="text" id="username" name="username" required>
     </div>
-    <div>
+    <div class="my-2">
         <label for="password" th:text="#{password}">Password:</label>
         <input type="password" id="password" name="password" required>
     </div>
-    <div>
-        <input type="submit" th:value="#{login}">
-    </div>
+    <input type="submit" th:value="#{login}" class="btn btn-primary my-2">
 </form>
-<h5>Don't have an account?</h5>
-<a href="/register" th:text="#{signup}"></a>
+<h5 th:text="#{no_account}" class="m-4">Don't have an account?</h5>
+<a href="/register" th:text="#{signup}"  class="mt-4 ml-2"></a>
 </body>
 </html>

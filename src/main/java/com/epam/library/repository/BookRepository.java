@@ -9,11 +9,11 @@ import java.util.Optional;
 
 //Crud repository for the work with ´books´ table
 public interface BookRepository extends PagingAndSortingRepository<Book, Integer> {
-    Book findByTitleAndAuthorAndPublicationYear(String name, String author, int publicationYear);
+    Optional<Book> findByTitleAndAuthorAndPublicationYear(String name, String author, int publicationYear);
 
     Optional<Book> findById(Integer id);
 
-    Book save(Book book);
+    Optional<Book> save(Book book);
 
     Page<Book> findByTitle(String title, Pageable pageable);
 

@@ -43,36 +43,28 @@
     <div class="container">
         <h1 class="title" th:text="#{books}">Books</h1>
         <h3><a th:if="${#authorization.expression('hasAuthority(''ROLE_ADMIN'')')}"
-               class="nav-link active" href="/add-book"  th:text="#{add_book}">Add book</a></h3>
+               class="btn btn-primary" href="/add-book"  th:text="#{add_book}">Add book</a></h3>
 
-        <form method="get" action="/books">
-            <label>
-                <input type="text" name="query" placeholder="Search...">
-            </label>
-            <label>
-                <select name="field">
-                    <option value="title" th:text="#{title}">Title</option>
-                    <option value="author" th:text="#{author}">Author</option>
-                </select>
-            </label>
-            <button type="submit" th:text="#{search}">Search</button>
+        <form method="get" action="/books" class="mt-4 mb-2">
+            <input type="text" name="query" placeholder="Search...">
+            <select name="field" class="ml-4">
+                <option value="title" th:text="#{title}">Title</option>
+                <option value="author" th:text="#{author}">Author</option>
+            </select>
+            <button type="submit" th:text="#{search}" class="btn btn-primary ml-4">Search</button>
         </form>
 
-        <form method="get" action="/books">
-            <label>
-                <select name="sortField">
-                    <option value="title" th:text="#{title}">Title</option>
-                    <option value="author" th:text="#{author}">Author</option>
-                    <option value="publicationYear" th:text="#{publication_year}">Publication year</option>
-                </select>
-            </label>
-            <label>
-                <select name="sortOrder">
-                    <option value="asc" th:text="#{ascending}">Ascending</option>
-                    <option value="desc" th:text="#{descending}">Descending</option>
-                </select>
-            </label>
-            <button type="submit" th:text="#{sort}">Sort</button>
+        <form method="get" action="/books" class="my-2">
+            <select name="sortField">
+                <option value="title" th:text="#{title}">Title</option>
+                <option value="author" th:text="#{author}">Author</option>
+                <option value="publicationYear" th:text="#{publication_year}">Publication year</option>
+            </select>
+            <select name="sortOrder" class="ml-4">
+                <option value="asc" th:text="#{ascending}">Ascending</option>
+                <option value="desc" th:text="#{descending}">Descending</option>
+            </select>
+            <button type="submit" th:text="#{sort}" class="btn btn-primary ml-4">Sort</button>
         </form>
 
         <table class="table">

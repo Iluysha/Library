@@ -18,12 +18,20 @@ import java.util.Optional;
 public class BookService {
 
     private static final Logger log = LogManager.getLogger(BookService.class);
-    private final int PAGE_SIZE = 5;
+
+    private final int pageSize = 5;
 
     private final BookRepository repo;
 
     public BookService(BookRepository repo) {
         this.repo = repo;
+    }
+
+    //Update existing book
+    public Book save(Book book) {
+        log.info("Saving book: {}", book);
+        repo.save(book);
+        return book;
     }
 
     //Add a copy of the book
@@ -43,51 +51,63 @@ public class BookService {
 
             return book;
         } else {
-            log.info("Adding a new book: {}", bookTitle);
+            try {
+                log.info("Adding a new book: {}", bookTitle);
 
-            Book newBook = new Book();
-            newBook.setTitle(bookTitle);
-            newBook.setAuthor(bookAuthor);
-            newBook.setPublicationYear(Integer.parseInt(publicationYear));
-            newBook.setNumOfCopies(1);
-            newBook.setAvailableCopies(1);
+                Book newBook = new Book(bookTitle, bookAuthor, Integer.parseInt(publicationYear));
+                repo.save(newBook);
 
-            repo.save(newBook);
-
-            return newBook;
+                return newBook;
+            } catch (NumberFormatException e) {
+                log.error("Wrong input: {}, {}, {}", bookTitle, bookAuthor, publicationYear);
+                return null;
+            }
         }
-    }
-
-    //Update existing book
-    public void save(Book book) {
-        log.info("Saving book: {}", book);
-        repo.save(book);
     }
 
     //Get list of all books
-    public Page<Book> getBooks(String query, String field, int pageNo, String sortField, String sortOrder) {
+    public Page<Book> getBooks(String searchQuery, String searchField, int pageNo, String sortField, String sortOrder) {
         log.info("Searching books. Query: {}, Field: {}, Page: {}, SortField: {}, SortOrder: {}",
-                query, field, pageNo, sortField, sortOrder);
+                searchQuery, searchField, pageNo, sortField, sortOrder);
 
         Sort sort = Sort.by(sortField.equals("author") ? "author" : "title");
+        sort = sortOrder.equals("desc") ? sort.descending() : sort.ascending();
 
-        if (sortOrder.equals("desc")) {
-            sort = sort.descending();
+        if (pageNo < 1) {
+            log.warn("Invalid page number: {}", pageNo);
+            return null;
+        }
+        Pageable pageable = PageRequest.of(pageNo - 1, pageSize, sort);
+
+        Page<Book> page;
+
+        if (!searchField.equals("") && !searchQuery.equals("")) {
+            if(Objects.equals(searchField, "author")) {
+                log.info("Searching books by author");
+                page = repo.findByAuthor(searchQuery, pageable);
+            } else {
+                log.info("Searching books by title");
+                page = repo.findByTitle(searchQuery, pageable);
+            }
         } else {
-            sort = sort.ascending();
+            log.info("Getting all books");
+            page = repo.findAll(pageable);
         }
 
-        Pageable pageable = PageRequest.of(pageNo - 1, PAGE_SIZE, sort);
-
-        if (query != null && field != null && !query.equals("")) {
-            return Objects.equals(field, "title") ? repo.findByTitle(query, pageable) : repo.findByAuthor(query, pageable);
+        if (page.getTotalPages() != 0 && pageNo > page.getTotalPages()) {
+            log.error("Invalid page number: {}", pageNo);
+            return null;
         } else {
-            return repo.findAll(pageable);
+            return page;
         }
     }
 
-    public Optional<Book> getById(Integer id) {
+    public Optional<Book> findById(Integer id) {
         log.info("Getting book by ID: {}", id);
         return repo.findById(id);
+    }
+
+    public int getPageSize() {
+        return pageSize;
     }
 }

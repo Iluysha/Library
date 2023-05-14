@@ -27,7 +27,7 @@
             </ul>
             <ul class="nav navbar-nav ml-auto">
                 <li><a class="nav-link active bg-gray ml-auto"
-                       th:href="@{?pageNo=__${currentPage}__&amp;sortField=__${sortField}__&amp;sortOrder=__${sortOrder}__&amp;lang=__#{lang_code}__}"
+                       th:href="@{?pageNo=__${pageNo}__&amp;sortField=__${sortField}__&amp;sortOrder=__${sortOrder}__&amp;lang=__#{lang_code}__}"
                        th:text="#{lang}"></a>
                 </li>
                 <li><a class="nav-link active" sec:authorize="!isAuthenticated()" href="/login"
@@ -46,15 +46,18 @@
                class="btn btn-primary" href="/add-book"  th:text="#{add_book}">Add book</a></h3>
 
         <form method="get" action="/books" class="mt-4 mb-2">
-            <input type="text" name="query" placeholder="Search...">
-            <select name="field" class="ml-4">
+            <input type="text" name="searchQuery" placeholder="Search...">
+            <select name="searchField" class="ml-4">
                 <option value="title" th:text="#{title}">Title</option>
                 <option value="author" th:text="#{author}">Author</option>
             </select>
             <button type="submit" th:text="#{search}" class="btn btn-primary ml-4">Search</button>
         </form>
 
-        <form method="get" action="/books" class="my-2">
+        <form class="my-2" method="get" action="/books">
+            <input type="hidden" name="searchQuery" th:value="${searchQuery}">
+            <input type="hidden" name="searchField" th:value="${searchField}">
+            <input type="hidden" name="pageNo" th:value="${pageNo}">
             <select name="sortField">
                 <option value="title" th:text="#{title}">Title</option>
                 <option value="author" th:text="#{author}">Author</option>
@@ -98,29 +101,29 @@
         <ul class="pagination">
             <li>
                 <a class="nav-link"
-                   th:classappend="${currentPage == 1}? 'disabled'"
-                   th:href="@{?pageNo=1&amp;sortField=__${sortField}__&amp;sortOrder=__${sortOrder}__}"> &laquo; </a>
+                   th:classappend="${pageNo == 1}? 'disabled'"
+                   th:href="@{?pageNo=1&amp;sortField=__${sortField}__&amp;sortOrder=__${sortOrder}__&amp;searchQuery=__${searchQuery}__&amp;searchField=__${searchField}__}"> &laquo; </a>
             </li>
             <li>
                 <a class="nav-link"
-                   th:classappend="${currentPage == 1}? 'disabled'"
-                   th:href="@{?pageNo=__${currentPage - 1}__&amp;sortField=__${sortField}__&amp;sortOrder=__${sortOrder}__}">&lsaquo;</a>
+                   th:classappend="${pageNo == 1}? 'disabled'"
+                   th:href="@{?pageNo=__${pageNo - 1}__&amp;sortField=__${sortField}__&amp;sortOrder=__${sortOrder}__&amp;searchQuery=__${searchQuery}__&amp;searchField=__${searchField}__}">&lsaquo;</a>
             </li>
             <li th:each="page : ${#numbers.sequence(1, totalPages)}">
                 <a class="nav-link"
-                   th:classappend="${currentPage == page} ? 'disabled'"
-                   th:href="@{?pageNo=__${page}__&amp;sortField=__${sortField}__&amp;sortOrder=__${sortOrder}__}"
+                   th:classappend="${pageNo == page} ? 'disabled'"
+                   th:href="@{?pageNo=__${page}__&amp;sortField=__${sortField}__&amp;sortOrder=__${sortOrder}__&amp;searchQuery=__${searchQuery}__&amp;searchField=__${searchField}__}"
                    th:text="${page}"></a>
             </li>
             <li>
                 <a class="nav-link"
-                   th:classappend="${currentPage == totalPages} ? 'disabled'"
-                   th:href="@{?pageNo=__${currentPage + 1}__&amp;sortField=__${sortField}__&amp;sortOrder=__${sortOrder}__}">&rsaquo;</a>
+                   th:classappend="${pageNo == totalPages} ? 'disabled'"
+                   th:href="@{?pageNo=__${pageNo + 1}__&amp;sortField=__${sortField}__&amp;sortOrder=__${sortOrder}__&amp;searchQuery=__${searchQuery}__&amp;searchField=__${searchField}__}">&rsaquo;</a>
             </li>
             <li>
                 <a class="nav-link"
-                   th:classappend="${currentPage == totalPages} ? 'disabled'"
-                   th:href="@{?pageNo=__${totalPages}__&amp;sortField=__${sortField}__&amp;sortOrder=__${sortOrder}__}">&raquo;</a>
+                   th:classappend="${pageNo == totalPages} ? 'disabled'"
+                   th:href="@{?pageNo=__${totalPages}__&amp;sortField=__${sortField}__&amp;sortOrder=__${sortOrder}__&amp;searchQuery=__${searchQuery}__&amp;searchField=__${searchField}__}">&raquo;</a>
             </li>
         </ul>
     </div>

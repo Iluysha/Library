@@ -69,8 +69,9 @@
                 </form>
             </td>
             <td th:text="${subscription.isApproved()} ? ${subscription.getStartDate()} : #{pending}"></td>
-            <td th:text="${subscription.isApproved()} ?
-            ${subscription.getStartDate().plusDays(subscription.getPeriod())}  : #{pending}">
+            <td th:text="${subscription.isApproved()} ? (${subscription.getFine() != 0} ?
+            #{overdue} + ${subscription.getFine()} :
+            ${subscription.getStartDate().plusDays(subscription.getPeriod())}) : #{pending}"></td>
         </tr>
         </tbody>
     </table>

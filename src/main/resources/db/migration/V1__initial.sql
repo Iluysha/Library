@@ -13,8 +13,9 @@ CREATE TABLE subscriptions (
     book_id INTEGER NOT NULL,
     user_id INTEGER NOT NULL,
     approved BIT NOT NULL,
-    start_date datetime(6) NOT NULL,
-    period INTEGER NOT NULL,
+    start_date datetime(6),
+    period INTEGER,
+    fine LONG,
     PRIMARY KEY (id)
 );
 

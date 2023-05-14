@@ -11,11 +11,11 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 //Service for crud operations with users
 @Service
@@ -45,27 +45,25 @@ public class UserService implements UserDetailsService {
         repo.save(user);
     }
 
-    public User register(@RequestParam("name") String name,
-                         @RequestParam("email") String email,
-                         @RequestParam("password") String password) {
+    public User register(String name, String email, String password) {
         log.info("Registering user with email: {}", email);
 
         if(findByEmail(email).isPresent()) {
             log.info("Email {} already registered", email);
             return null;
         } else {
-            // Create a new user object
-            User user = new User();
-            user.setName(name);
-            user.setEmail(email);
-            user.setPassword(passwordEncoder.encode(password));
-            user.setRole(User.Role.READER);
+            if(Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$").matcher(email).matches() &&
+                    !name.equals("") && !password.equals("")) {
+                // Create and save a new user object
+                User user = new User(name, email, passwordEncoder.encode(password), User.Role.READER);
+                save(user);
 
-            // Save the user
-            save(user);
-
-            log.info("User registered successfully: {}", user);
-            return user;
+                log.info("User registered successfully: {}", user);
+                return user;
+            } else {
+                log.error("Wrong input: {}, {}, {}", name, email, password);
+                return null;
+            }
         }
     }
 
@@ -86,7 +84,7 @@ public class UserService implements UserDetailsService {
             log.info("User {} blocked", user);
             return user;
         } else {
-            log.info("User {} not found", id);
+            log.error("User {} not found", id);
             return null;
         }
     }
@@ -106,7 +104,7 @@ public class UserService implements UserDetailsService {
                     Collections.singletonList(authority)
             );
         } else {
-            return null;
+            throw new UsernameNotFoundException("User not found");
         }
     }
 }

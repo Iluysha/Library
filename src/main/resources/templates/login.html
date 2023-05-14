@@ -33,7 +33,7 @@
 <form th:action="@{/login}" method="post" class="m-4">
     <div class="my-2">
         <label for="username" th:text="#{email}">Email:</label>
-        <input type="text" id="username" name="username" required>
+        <input type="text" id="username" name="username" pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" required>
     </div>
     <div class="my-2">
         <label for="password" th:text="#{password}">Password:</label>
@@ -42,6 +42,6 @@
     <input type="submit" th:value="#{login}" class="btn btn-primary my-2">
 </form>
 <h5 th:text="#{no_account}" class="m-4">Don't have an account?</h5>
-<a href="/register" th:text="#{signup}"  class="mt-4 ml-2"></a>
+<a href="/register" th:text="#{signup}"  class="ml-4"></a>
 </body>
 </html>

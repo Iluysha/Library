@@ -6,6 +6,7 @@ import com.epam.library.entity.User;
 import com.epam.library.repository.SubscriptionRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +22,8 @@ public class SubscriptionService {
     private final SubscriptionRepository repo;
     private final UserService userService;
     private final BookService bookService;
+
+    private final int dayFine = 10;
 
     public SubscriptionService(SubscriptionRepository repo, UserService userService,
                                BookService bookService) {
@@ -51,10 +54,10 @@ public class SubscriptionService {
     }
 
     public Subscription orderBook(UserDetails userDetails, Integer id) {
-        log.info("Order book id: {} for user: {}", userDetails.getUsername(), id);
+        log.info("Order book id: {} for user: {}", id, userDetails.getUsername());
 
         Optional<User> optionalUser = userService.findByEmail(userDetails.getUsername());
-        Optional<Book> optionalBook = bookService.getById(id);
+        Optional<Book> optionalBook = bookService.findById(id);
 
         if (optionalUser.isPresent() && optionalBook.isPresent()) {
             User user = optionalUser.get();
@@ -63,12 +66,7 @@ public class SubscriptionService {
             if (book.getAvailableCopies() > 0) {
                 book.setAvailableCopies(book.getAvailableCopies() - 1);
 
-                Subscription subscription = new Subscription();
-                subscription.setUser(user);
-                subscription.setBook(book);
-                subscription.setStartDate(LocalDate.now());
-                subscription.setApproved(false);
-                subscription.setPeriod(60);
+                Subscription subscription = new Subscription(user, book);
 
                 save(subscription);
                 bookService.save(book);
@@ -76,12 +74,12 @@ public class SubscriptionService {
                 log.info("Order placed successfully for user: {} and book: {}", user.getName(), book.getTitle());
                 return subscription;
             } else {
-                log.warn("Failed to place order for user: {} and book: {}. No such book or no available copies.",
+                log.error("Failed to place order for user: {} and book: {}. No such book or no available copies.",
                         userDetails.getUsername(), id);
                 return null;
             }
         } else {
-            log.warn("Failed to place order for user: {} and book: {}. No such book or no available copies.",
+            log.error("Failed to place order for user: {} and book: {}. No such book or no available copies.",
                     userDetails.getUsername(), id);
             return null;
         }
@@ -93,13 +91,31 @@ public class SubscriptionService {
         if(optionalSubscription.isPresent() && !optionalSubscription.get().isApproved()) {
             Subscription subscription = optionalSubscription.get();
             subscription.setApproved(true);
+            subscription.setStartDate(LocalDate.now());
+            subscription.setPeriod(60);
+            subscription.setFine(0);
             save(subscription);
 
             log.info("Subscription with id: {} successfully approved", id);
             return subscription;
         } else {
-            log.warn("Failed to approve subscription with id:  {}", id);
+            log.error("Failed to approve subscription with id:  {}", id);
             return null;
+        }
+    }
+
+    public int getDayFine() {
+        return dayFine;
+    }
+
+    @Scheduled(cron = "0 0 0 * * *") // Run at midnight every day
+    public void calculateAndAddFines() {
+        log.info("Updating subscriptions fines");
+
+        List<Subscription> subscriptions = (List<Subscription>) repo.findAll();
+
+        for (Subscription subscription : subscriptions) {
+            subscription.updateFine(dayFine);
         }
     }
 }

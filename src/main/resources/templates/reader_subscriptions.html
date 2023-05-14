@@ -59,8 +59,9 @@
             <td th:text="${subscription.getBook().getPublicationYear()}"></td>
             <td th:text="${subscription.isApproved()} ? #{approved} : #{pending}"></td>
             <td th:text="${subscription.isApproved()} ? ${subscription.getStartDate()} : #{pending}"></td>
-            <td th:text="${subscription.isApproved()} ?
-            ${subscription.getStartDate().plusDays(subscription.getPeriod())} : #{pending}">
+            <td th:text="${subscription.isApproved()} ? (${subscription.getFine() != 0} ?
+            #{overdue} + ${subscription.getFine()} :
+            ${subscription.getStartDate().plusDays(subscription.getPeriod())}) : #{pending}"></td>
             </td>
         </tr>
         </tbody>

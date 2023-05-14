@@ -2,6 +2,9 @@ package com.epam.library.entity;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+
 @Entity
 @Table(name="users")
 public class User {
@@ -30,10 +33,19 @@ public class User {
     private Role role;
 
     @Column(nullable = false)
-    private int fine;
+    private long fine;
 
     @Column(nullable = false)
     private boolean blocked;
+
+    public User() {}
+
+    public User(String name, String email, String password, Role role) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.role = role;
+    }
 
     public String getName() {
         return name;
@@ -63,12 +75,16 @@ public class User {
         return id;
     }
 
-    public int getFine() {
+    public long getFine() {
         return fine;
     }
 
-    public void setFine(int fine) {
+    public void setFine(long fine) {
         this.fine = fine;
+    }
+
+    public void addFine(long add) {
+        fine += add;
     }
 
     public Role getRole() {

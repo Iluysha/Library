@@ -33,6 +33,16 @@ public class Book {
     @Column(nullable = false)
     private int availableCopies;
 
+    public Book() {}
+
+    public Book(String title, String author, Integer publicationYear) {
+        this.title = title;
+        this.author = author;
+        this.publicationYear = publicationYear;
+        this.numOfCopies = 1;
+        this.availableCopies = 1;
+    }
+
     public String getTitle() {
         return title;
     }

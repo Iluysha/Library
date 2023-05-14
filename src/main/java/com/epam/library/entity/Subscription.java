@@ -20,14 +20,24 @@ public class Subscription {
     @JoinColumn(name="book_id", nullable=false)
     private Book book;
 
-    @Column(name="approved", nullable = false)
+    @Column(nullable = false)
     private boolean approved;
 
-    @Column(name="start_date", nullable = false)
+    @Column()
     private LocalDate startDate;
 
-    @Column(name="period", nullable = false)
+    @Column()
     private int period;
+
+    @Column(nullable = false)
+    private long fine;
+
+    public Subscription() {}
+    public Subscription(User user, Book book) {
+        this.user = user;
+        this.book = book;
+        this.approved = false;
+    }
 
     public boolean isApproved() {
         return approved;
@@ -71,5 +81,23 @@ public class Subscription {
 
     public Integer getId() {
         return id;
+    }
+
+    public long getFine() {
+        return fine;
+    }
+
+    public void setFine(long fine) {
+        this.fine = fine;
+    }
+
+    public void updateFine(int dayFine) {
+        LocalDate currentDate = LocalDate.now();
+        LocalDate endDate = startDate.plusDays(period);
+
+        if (currentDate.isAfter(endDate)) {
+            fine += dayFine;
+            user.addFine(dayFine);
+        }
     }
 }

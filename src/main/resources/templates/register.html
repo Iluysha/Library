@@ -35,7 +35,7 @@
     </div>
     <div>
         <label for="email" th:text="#{email}">Email:</label>
-        <input type="text" id="email" name="email" required>
+        <input type="text" id="email" name="email" pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" required>
     </div>
     <div>
         <label for="password" th:text="#{password}">Password:</label>

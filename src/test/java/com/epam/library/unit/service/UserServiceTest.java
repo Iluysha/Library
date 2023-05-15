@@ -73,8 +73,7 @@ public class UserServiceTest {
         String name = "John Doe";
         String email = "johndoe@example.com";
         String password = "password";
-        Mockito.when(mockedPasswordEncoder.encode(password))
-                .thenReturn(passwordEncoder.encode(password));
+        Mockito.when(mockedPasswordEncoder.encode(password)).thenReturn(passwordEncoder.encode(password));
         Mockito.when(repo.findByEmail(email)).thenReturn(Optional.empty());
 
         // Act

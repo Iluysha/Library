@@ -39,7 +39,7 @@ public class UserController {
         log.info("Registering user with email: {}", email);
 
         // Check if the email is already registered
-        if(userService.register(name, email, password) != null) {
+        if(userService.register(name, email, password) == null) {
             attributes.addFlashAttribute("error", true);
             return "redirect:/register";
         } else {

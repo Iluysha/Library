@@ -2,9 +2,6 @@ package com.epam.library.entity;
 
 import jakarta.persistence.*;
 
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-
 @Entity
 @Table(name="users")
 public class User {
@@ -73,6 +70,10 @@ public class User {
 
     public Integer getId() {
         return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public long getFine() {

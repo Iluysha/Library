@@ -45,13 +45,6 @@ public class SubscriptionController {
         return "order";
     }
 
-    /*
-    Method, handling get request to the /order URL after user press ´Order´ button.
-    Gets the id of the book from the request, checks if this book exists in the library
-    and there are available copies. Then reduce number of available copies by one and saves the book.
-    Then returns order page with the message about the order.
-    If there is no such a book in the library or no available copies, redirects to the error page.
-    */
     @PostMapping("/order")
     public String orderBook(@AuthenticationPrincipal UserDetails userDetails,
                             @RequestParam("bookId") Integer id,

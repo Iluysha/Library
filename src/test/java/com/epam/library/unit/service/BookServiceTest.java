@@ -114,7 +114,7 @@ public class BookServiceTest {
         Pageable pageable = PageRequest.of(pageNo - 1, bookService.getPageSize(), sort);
         System.out.println(pageable);
 
-        Mockito.when(repo.findByTitle(searchQuery, pageable)).thenReturn(new PageImpl<>(List.of(expectedBooks.get(0)),
+        Mockito.when(repo.findByTitleContaining(searchQuery, pageable)).thenReturn(new PageImpl<>(List.of(expectedBooks.get(0)),
                 pageable, 1));
 
         // Act
@@ -143,7 +143,7 @@ public class BookServiceTest {
         Pageable pageable = PageRequest.of(pageNo - 1, bookService.getPageSize(), sort);
         System.out.println(pageable);
 
-        Mockito.when(repo.findByAuthor(searchQuery, pageable)).thenReturn(new PageImpl<>(expectedBooks,
+        Mockito.when(repo.findByAuthorContaining(searchQuery, pageable)).thenReturn(new PageImpl<>(expectedBooks,
                 pageable, expectedBooks.size()));
 
         // Act
@@ -185,7 +185,7 @@ public class BookServiceTest {
 
         Page<Book> expectedBooks = new PageImpl<>(Collections.emptyList());
 
-        Mockito.when(repo.findByTitle(Mockito.eq(searchQuery), Mockito.any(Pageable.class))).thenReturn(expectedBooks);
+        Mockito.when(repo.findByTitleContaining(Mockito.eq(searchQuery), Mockito.any(Pageable.class))).thenReturn(expectedBooks);
 
         // Act
         Page<Book> actualBooks = bookService.getBooks(searchQuery, searchField, pageNo, sortField, sortOrder);
@@ -223,7 +223,7 @@ public class BookServiceTest {
 
         Page<Book> expectedBooks = null;
 
-        Mockito.when(repo.findByTitle(Mockito.eq(searchQuery), Mockito.any(Pageable.class)))
+        Mockito.when(repo.findByTitleContaining(Mockito.eq(searchQuery), Mockito.any(Pageable.class)))
                 .thenReturn(new PageImpl<>(Collections.emptyList()));
 
         // Act
@@ -244,7 +244,7 @@ public class BookServiceTest {
 
         Page<Book> expectedBooks = new PageImpl<>(Collections.emptyList());
 
-        Mockito.when(repo.findByTitle(Mockito.eq(searchQuery), Mockito.any(Pageable.class))).thenReturn(expectedBooks);
+        Mockito.when(repo.findByTitleContaining(Mockito.eq(searchQuery), Mockito.any(Pageable.class))).thenReturn(expectedBooks);
 
         // Act
         Page<Book> actualBooks = bookService.getBooks(searchQuery, searchField, pageNo, sortField, sortOrder);

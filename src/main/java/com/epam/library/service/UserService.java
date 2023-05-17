@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
@@ -45,6 +46,7 @@ public class UserService implements UserDetailsService {
         repo.save(user);
     }
 
+    @Transactional(readOnly = true)
     public User register(String name, String email, String password) {
         log.info("Registering user with email: {}", email);
 
@@ -73,6 +75,7 @@ public class UserService implements UserDetailsService {
         return repo.findByRoleNot(User.Role.ADMIN);
     }
 
+    @Transactional(readOnly = true)
     public User blockUser(Integer id) {
         Optional<User> optionalUser = findById(id);
 

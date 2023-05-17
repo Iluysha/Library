@@ -4,11 +4,13 @@ import com.epam.library.entity.Book;
 import com.epam.library.entity.Subscription;
 import com.epam.library.entity.User;
 import com.epam.library.repository.SubscriptionRepository;
+import org.springframework.transaction.annotation.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -53,6 +55,7 @@ public class SubscriptionService {
         return (List<Subscription>) repo.findAll();
     }
 
+    @Transactional(readOnly = true)
     public Subscription orderBook(UserDetails userDetails, Integer id) {
         log.info("Order book id: {} for user: {}", id, userDetails.getUsername());
 
@@ -85,6 +88,7 @@ public class SubscriptionService {
         }
     }
 
+    @Transactional
     public Subscription approveSubscription(Integer id) {
         Optional<Subscription> optionalSubscription = findById(id);
 

@@ -11,4 +11,6 @@ public interface UserRepository extends CrudRepository<User, Integer> {
     Optional<User> findByEmail(String email);
 
     List<User> findByRoleNot(User.Role admin);
+
+    void deleteByEmail(String email);
 }

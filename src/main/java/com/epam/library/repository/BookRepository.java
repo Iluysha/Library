@@ -15,7 +15,11 @@ public interface BookRepository extends PagingAndSortingRepository<Book, Integer
 
     Optional<Book> save(Book book);
 
-    Page<Book> findByTitle(String title, Pageable pageable);
+    Page<Book> findByTitleContaining(String title, Pageable pageable);
 
-    Page<Book> findByAuthor(String author, Pageable pageable);
+    Page<Book> findByAuthorContaining(String author, Pageable pageable);
+
+    void delete(Book book);
+
+    void deleteByTitle(String title);
 }

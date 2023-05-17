@@ -36,8 +36,6 @@ public class UserController {
                                @RequestParam("email") String email,
                                @RequestParam("password") String password,
                                RedirectAttributes attributes) {
-        log.info("Registering user with email: {}", email);
-
         // Check if the email is already registered
         if(userService.register(name, email, password) == null) {
             attributes.addFlashAttribute("error", true);

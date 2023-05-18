@@ -6,7 +6,9 @@ import com.epam.library.entity.User;
 import com.epam.library.repository.BookRepository;
 import com.epam.library.repository.SubscriptionRepository;
 import com.epam.library.repository.UserRepository;
+import org.junit.After;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -19,6 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -38,6 +41,14 @@ public class SubscriptionControllerIT {
     @Autowired
     private SubscriptionRepository subscriptionRepository;
 
+    @After
+    @BeforeEach
+    public void cleanDatabase() {
+        subscriptionRepository.deleteAll();
+        userRepository.deleteAll();
+        bookRepository.deleteAll();
+    }
+
     @Test
     @WithMockUser(username = "johndoe@example.com", roles = {"READER"})
     public void testSubscriptionsAsReader() throws Exception {
@@ -47,7 +58,7 @@ public class SubscriptionControllerIT {
         userRepository.save(user);
         Book book = new Book("The Lord of the Rings", "J.R.R. Tolkien", 1954);
         bookRepository.save(book);
-        Subscription subscription = subscriptionRepository.save(new Subscription(user, book));
+        subscriptionRepository.save(new Subscription(user, book));
 
         // Perform the request and validate the response
         mockMvc.perform(get("/subscriptions"))
@@ -61,29 +72,22 @@ public class SubscriptionControllerIT {
                                         hasProperty("title", is("The Lord of the Rings")))
                         )
                 )));
-
-        // Clean up the test subscription
-        subscriptionRepository.delete(subscription);
-        userRepository.delete(user);
-        bookRepository.delete(book);
     }
 
     @Test
     @WithMockUser(username = "jackdoe@example.com", roles = {"LIBRARIAN"})
     public void testSubscriptionsAsLibrarian() throws Exception {
         // Create the subscriptions
-        User userReader = new User("John Doe", "johndoe@example.com",
-                passwordEncoder.encode("password"), User.Role.READER);
-        User userLibrarian = new User("Jack Doe", "jackdoe@example.com",
-                passwordEncoder.encode("password"), User.Role.LIBRARIAN);
-        userRepository.save(userReader);
-        userRepository.save(userLibrarian);
+        User userReader = userRepository.save(new User("John Doe", "johndoe@example.com",
+                passwordEncoder.encode("password"), User.Role.READER));
+        User userLibrarian = userRepository.save(new User("Jack Doe", "jackdoe@example.com",
+                passwordEncoder.encode("password"), User.Role.LIBRARIAN));
         Book book1 = new Book("The Lord of the Rings", "J.R.R. Tolkien", 1954);
         Book book2 = new Book("The Hobbit", "J.R.R. Tolkien", 1937);
         bookRepository.save(book1);
         bookRepository.save(book2);
-        Subscription subscriptionReader = subscriptionRepository.save(new Subscription(userReader, book1));
-        Subscription subscriptionLibrarian = subscriptionRepository.save(new Subscription(userLibrarian, book2));
+        subscriptionRepository.save(new Subscription(userReader, book1));
+        subscriptionRepository.save(new Subscription(userLibrarian, book2));
 
         // Perform the request and validate the response
         mockMvc.perform(get("/subscriptions"))
@@ -105,13 +109,61 @@ public class SubscriptionControllerIT {
                                         hasProperty("title", is("The Hobbit")))
                         )
                 )));
+    }
 
-        // Clean up the test data
-        subscriptionRepository.delete(subscriptionReader);
-        subscriptionRepository.delete(subscriptionLibrarian);
-        bookRepository.delete(book1);
-        bookRepository.delete(book2);
-        userRepository.delete(userReader);
-        userRepository.delete(userLibrarian);
+    @Test
+    @WithMockUser(username = "johndoe@example.com", roles = {"READER"})
+    public void testOrderBook() throws Exception {
+        // Create the user and book
+        userRepository.save(new User("John Doe", "johndoe@example.com",
+                passwordEncoder.encode("password"), User.Role.READER));
+        Book book = bookRepository.save(new
+                Book("The Lord of the Rings", "J.R.R. Tolkien", 1954)).get();
+
+        // Perform the request and validate the response
+        mockMvc.perform(post("/order")
+                        .param("bookId", book.getId().toString()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("order"));
+    }
+
+    @Test
+    @WithMockUser(username = "johndoe@example.com", roles = {"LIBRARIAN"})
+    public void testSubscriptionsApprove() throws Exception {
+        // Create the subscription
+        User user = new User("Jack Doe", "jackdoe@example.com",
+                passwordEncoder.encode("password"), User.Role.READER);
+        userRepository.save(user);
+        Book book = new Book("The Lord of the Rings", "J.R.R. Tolkien", 1954);
+        bookRepository.save(book);
+        Subscription subscription = subscriptionRepository.save(new Subscription(user, book));
+
+        // Perform the request and validate the response
+        mockMvc.perform(post("/approve")
+                        .param("subscriptionId", subscription.getId().toString()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("subscriptions"));
+    }
+
+    @Test
+    @WithMockUser(username = "johndoe@example.com", roles = {"LIBRARIAN"})
+    public void testSubscriptionsApprove_invalid() throws Exception {
+        // Create the subscription
+        User user = new User("Jack Doe", "jackdoe@example.com",
+                passwordEncoder.encode("password"), User.Role.READER);
+        userRepository.save(user);
+        Book book = new Book("The Lord of the Rings", "J.R.R. Tolkien", 1954);
+        bookRepository.save(book);
+        Subscription subscription = new Subscription(user, book);
+        subscription.setApproved(true);
+        subscriptionRepository.save(subscription);
+
+        // Perform the request and validate the response
+        mockMvc.perform(post("/approve")
+                        .param("subscriptionId", subscription.getId().toString()))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("error"))
+                .andExpect(flash().attributeExists("msg_code"))
+                .andExpect(flash().attribute("msg_code", "cant_approve"));
     }
 }

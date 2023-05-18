@@ -2,26 +2,19 @@ package com.epam.library.integration;
 
 import com.epam.library.entity.Book;
 import com.epam.library.repository.BookRepository;
+import org.junit.After;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -33,46 +26,68 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class BookControllerIT {
 
     @Autowired
-    private TestRestTemplate restTemplate;
-    @Autowired
     private MockMvc mockMvc;
     @Autowired
     private BookRepository bookRepository;
 
+    @After
+    @BeforeEach
+    public void cleanDatabase() {
+        bookRepository.deleteAll();
+    }
+
     @Test
-    public void testBooks_ValidInput() {
-        // Prepare test data
-        List<Book> expectedBooks = Arrays.asList(
-                new Book("Harry Potter 10", "J. K. Rowling", 2003),
-                new Book("Harry Potter 11", "J. K. Rowling", 2003)
-        );
+    public void testBooks_ValidInput() throws Exception {
+        // Create the books
+        Book book1 = new Book("The Lord of the Rings", "J.R.R. Tolkien", 1954);
+        Book book2 = new Book("The Hobbit", "J.R.R. Tolkien", 1937);
+        bookRepository.save(book1);
+        bookRepository.save(book2);
 
-        // Perform GET request to /books
-        ResponseEntity<String> response = restTemplate.getForEntity("/books", String.class);
-
-        // Assert the response status code and content
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertTrue(Objects.requireNonNull(response.getBody()).contains("Books"));
-
-        // Assert the presence of expected books in the response content
-        for (Book expectedBook : expectedBooks) {
-            assertTrue(response.getBody().contains(expectedBook.getTitle()));
-            assertTrue(response.getBody().contains(expectedBook.getAuthor()));
-        }
+        // Perform the request and validate the response
+        mockMvc.perform(get("/books"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("books"))
+                .andExpect(model().attribute("books", hasItem(
+                        allOf(
+                                hasProperty("title", is("The Lord of the Rings")),
+                                hasProperty("author", is("J.R.R. Tolkien")))
+                        )))
+                .andExpect(model().attribute("books", hasItem(
+                        allOf(
+                                hasProperty("title", is("The Hobbit")),
+                                hasProperty("author", is("J.R.R. Tolkien"))
+                        )))
+                );
     }
 
     @Test
     public void testBooks_InvalidInput() throws Exception {
+        // Create the books
+        Book book1 = new Book("The Lord of the Rings", "J.R.R. Tolkien", 1954);
+        Book book2 = new Book("The Hobbit", "J.R.R. Tolkien", 1937);
+        bookRepository.save(book1);
+        bookRepository.save(book2);
+
+        // Perform the request and validate the response
         mockMvc.perform(get("/books")
                         .param("pageNo", String.valueOf(100)))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/error"))
+                .andExpect(redirectedUrl("error"))
                 .andExpect(flash().attributeExists("msg_code"))
                 .andExpect(flash().attribute("msg_code", "invalid_page"));
     }
 
     @Test
-    @Transactional
+    @WithMockUser(username = "johndoe@example.com", roles = {"ADMIN"})
+    public void testAddBookPage() throws Exception {
+        // Perform the request and validate the response
+        mockMvc.perform(get("/add-book"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("add-book"));
+    }
+
+    @Test
     @WithMockUser(username = "johndoe@example.com", roles = {"ADMIN"})
     public void testAddBook_ValidInput() throws Exception {
         // Arrange
@@ -84,9 +99,7 @@ public class BookControllerIT {
                         .param("bookAuthor", book.getAuthor())
                         .param("publicationYear", book.getPublicationYear().toString()))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/books"));
-
-        bookRepository.deleteByTitle("The Lord of the Rings");
+                .andExpect(redirectedUrl("books"));
     }
 
     @Test
@@ -103,7 +116,7 @@ public class BookControllerIT {
                         .param("bookAuthor", bookAuthor)
                         .param("publicationYear", publicationYear))
                 .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/error"))
+                .andExpect(redirectedUrl("error"))
                 .andExpect(flash().attributeExists("msg_code"))
                 .andExpect(flash().attribute("msg_code", "invalid_input"));
     }

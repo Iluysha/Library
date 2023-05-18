@@ -50,7 +50,7 @@ public class BookService {
      * @param publicationYear  the publication year of the book
      * @return the added book or null if there was an error
      */
-    @Transactional(readOnly = true)
+    @Transactional
     public Book add(String bookTitle, String bookAuthor, String publicationYear) {
         log.info("Adding a book. Title: {}, Author: {}, PublicationYear: {}",
                 bookTitle, bookAuthor, publicationYear);
@@ -103,10 +103,11 @@ public class BookService {
             log.warn("Invalid page number: {}", pageNo);
             return null;
         }
-        Pageable pageable = PageRequest.of(pageNo - 1, pageSize, sort);
 
+        Pageable pageable = PageRequest.of(pageNo - 1, pageSize, sort);
         Page<Book> page;
 
+        // If search fields are empty, get all books
         if (!searchField.equals("") && !searchQuery.equals("")) {
             if(Objects.equals(searchField, "author")) {
                 log.info("Searching books by author");
@@ -124,6 +125,7 @@ public class BookService {
             log.error("Invalid page number: {}", pageNo);
             return null;
         } else {
+            // If pages number is zero, return it
             return page;
         }
     }

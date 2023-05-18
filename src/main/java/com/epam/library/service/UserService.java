@@ -18,7 +18,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-//Service for crud operations with users
+/**
+ * Service class for managing user-related operations.
+ */
 @Service
 public class UserService implements UserDetailsService {
 
@@ -31,22 +33,47 @@ public class UserService implements UserDetailsService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    /**
+     * Finds a user by their ID.
+     *
+     * @param id  The ID of the user to find.
+     * @return An Optional containing the found user, or an empty Optional if not found.
+     */
     public Optional<User> findById(Integer id) {
         log.info("Finding user by id: {}", id);
         return repo.findById(id);
     }
 
+    /**
+     * Finds a user by their email.
+     *
+     * @param email  The email of the user to find.
+     * @return An Optional containing the found user, or an empty Optional if not found.
+     */
     public Optional<User> findByEmail(String email) {
         log.info("Finding user by email: {}", email);
         return repo.findByEmail(email);
     }
 
+    /**
+     * Saves a user.
+     *
+     * @param user  The user to save.
+     */
     public void save(User user) {
         log.info("Saving user: {}", user);
         repo.save(user);
     }
 
-    @Transactional(readOnly = true)
+    /**
+     * Registers a new user with the specified name, email, and password.
+     *
+     * @param name     The name of the user.
+     * @param email    The email of the user.
+     * @param password The password of the user.
+     * @return The registered user, or null if registration fails.
+     */
+    @Transactional
     public User register(String name, String email, String password) {
         log.info("Registering user with email: {}", email);
 
@@ -69,13 +96,23 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    //Get a list of all users
+    /**
+     * Retrieves a list of all users who are not administrators.
+     *
+     * @return A list of all non-administrator users.
+     */
     public List<User> findAllNotAdmin() {
         log.info("Finding all users who are not administrators");
         return repo.findByRoleNot(User.Role.ADMIN);
     }
 
-    @Transactional(readOnly = true)
+    /**
+     * Blocks or unblocks a user with the specified ID.
+     *
+     * @param id  The ID of the user to block/unblock.
+     * @return The blocked/unblocked user, or null if the user was not found.
+     */
+    @Transactional
     public User blockUser(Integer id) {
         Optional<User> optionalUser = findById(id);
 
@@ -92,6 +129,14 @@ public class UserService implements UserDetailsService {
         }
     }
 
+    /**
+     * Loads a user by their username (email).
+     * Method is used for Spring Security authentication.
+     *
+     * @param username  The username (email) of the user to load.
+     * @return A UserDetails object representing the user.
+     * @throws UsernameNotFoundException if the user is not found.
+     */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<User> optionalUser = findByEmail(username);

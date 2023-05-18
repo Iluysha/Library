@@ -114,7 +114,7 @@ public class UserControllerTest {
         Mockito.when(userService.findAllNotAdmin()).thenReturn(users);
 
         // Act
-        String actualViewName = controller.readers(model);
+        String actualViewName = controller.users(model);
 
         // Assert
         assertEquals("users", actualViewName);

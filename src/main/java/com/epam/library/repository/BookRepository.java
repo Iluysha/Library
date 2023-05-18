@@ -22,4 +22,6 @@ public interface BookRepository extends PagingAndSortingRepository<Book, Integer
     void delete(Book book);
 
     void deleteByTitle(String title);
+
+    void deleteAll();
 }

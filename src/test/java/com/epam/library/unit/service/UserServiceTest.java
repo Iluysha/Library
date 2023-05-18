@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 
@@ -26,10 +27,8 @@ public class UserServiceTest {
 
     @Mock
     private UserRepository repo;
-
     @Mock
     public PasswordEncoder mockedPasswordEncoder;
-
     @InjectMocks
     private UserService userService;
 
@@ -37,86 +36,89 @@ public class UserServiceTest {
 
     @Test
     public void testFindById() {
+        // Arrange
         User user = new User("John Doe", "johndoe@example.com", "password", User.Role.READER);
+        user.setId(1);
         Mockito.when(repo.findById(anyInt())).thenReturn(Optional.of(user));
 
-        Optional<User> optionalUser = userService.findById(1);
+        // Act
+        User foundUser = userService.findById(user.getId());
 
-        assertTrue(optionalUser.isPresent());
-        assertEquals(user, optionalUser.get());
+        // Assert
+        assertEquals(user, foundUser);
     }
 
     @Test
     public void testFindByEmail() {
+        // Arrange
         User user = new User("John Doe", "johndoe@example.com", "password", User.Role.READER);
         Mockito.when(repo.findByEmail(anyString())).thenReturn(Optional.of(user));
 
-        Optional<User> optionalUser = userService.findByEmail("johndoe@example.com");
+        // Act
+        User foundUser = userService.findByEmail("johndoe@example.com");
 
-        assertTrue(optionalUser.isPresent());
-        assertEquals(user, optionalUser.get());
+        // Assert
+        assertEquals(user, foundUser);
     }
 
     @Test
     public void testSave() {
+        // Arrange
         User user = new User("John Doe", "johndoe@example.com", "password", User.Role.READER);
         Mockito.when(repo.save(user)).thenReturn(user);
 
+        // Act
         userService.save(user);
 
+        // Assert
         Mockito.verify(repo, Mockito.times(1)).save(user);
     }
 
     @Test
-    public void testRegisterUserNotRegistered() {
+    public void testRegisterUserNotRegistered() throws Exception {
         // Arrange
         String name = "John Doe";
         String email = "johndoe@example.com";
         String password = "password";
+
         Mockito.when(mockedPasswordEncoder.encode(password)).thenReturn(passwordEncoder.encode(password));
         Mockito.when(repo.findByEmail(email)).thenReturn(Optional.empty());
+
+        User user = new User(name, email, mockedPasswordEncoder.encode(password), User.Role.READER);
 
         // Act
         User registeredUser = userService.register(name, email, password);
 
         // Assert
         assertNotNull(registeredUser);
-        assertEquals(name, registeredUser.getName());
-        assertEquals(email, registeredUser.getEmail());
-        assertEquals(User.Role.READER, registeredUser.getRole());
-        assertTrue(passwordEncoder.matches(password, registeredUser.getPassword()));
+        assertEquals(user, registeredUser);
         Mockito.verify(repo).save(registeredUser);
     }
 
     @Test
-    public void testRegisterUserAlreadyRegistered() {
+    public void testRegisterUser_alreadyRegistered() throws Exception {
         // Arrange
         String name = "John Doe";
         String email = "johndoe@example.com";
         String password = "password";
         User existingUser = new User(name, email, mockedPasswordEncoder.encode(password), User.Role.READER);
+
         Mockito.when(repo.findByEmail(email)).thenReturn(Optional.of(existingUser));
 
-        // Act
-        User registeredUser = userService.register(name, email, password);
-
         // Assert
-        assertNull(registeredUser);
+        assertThrows(Exception.class, () -> userService.register(name, email, password));
         Mockito.verify(repo, Mockito.never()).save(Mockito.any(User.class));
     }
 
     @Test
-    public void testRegisterInvalidInput() {
+    public void testRegister_invalidInput() {
         // Arrange
         String name = "";
         String email = "invalid-email";
         String password = "";
 
-        // Act
-        User registeredUser = userService.register(name, email, password);
-
         // Assert
-        assertNull(registeredUser);
+        assertThrows(Exception.class, () -> userService.register(name, email, password));
         Mockito.verify(repo, Mockito.never()).save(Mockito.any(User.class));
     }
 
@@ -134,20 +136,21 @@ public class UserServiceTest {
     @Test
     public void testBlockUser() {
         User user = new User("John Doe", "johndoe@example.com", "password", User.Role.READER);
+        user.setId(1);
         Mockito.when(repo.findById(anyInt())).thenReturn(Optional.of(user));
 
-        userService.blockUser(1);
+        userService.blockUser(user.getId());
 
         Mockito.verify(repo, Mockito.times(1)).save(user);
     }
 
     @Test
     public void testBlockUserNotFound() {
+        // Arrange
         Mockito.when(repo.findById(anyInt())).thenReturn(Optional.empty());
 
-        User user = userService.blockUser(1);
-
-        assertNull(user);
+        //Assert
+        assertThrows(UsernameNotFoundException.class, () -> userService.blockUser(1));
     }
 
     @Test

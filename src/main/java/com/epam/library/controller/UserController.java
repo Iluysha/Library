@@ -1,19 +1,17 @@
 package com.epam.library.controller;
 
-import com.epam.library.entity.User;
 import com.epam.library.service.UserService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import java.util.Optional;
 
 /**
  * Controller class for managing user-related operations.
@@ -57,13 +55,15 @@ public class UserController {
                                @RequestParam("email") String email,
                                @RequestParam("password") String password,
                                RedirectAttributes attributes) {
-        // Check if the email is already registered
-        if(userService.register(name, email, password) == null) {
-            attributes.addFlashAttribute("error", true);
-            return "redirect:register";
-        } else {
+        try {
+            // Check if the email is already registered
+            userService.register(name, email, password);
+
             attributes.addFlashAttribute("signup", true);
             return "redirect:login";
+        } catch(Exception e) {
+            attributes.addFlashAttribute("error", true);
+            return "redirect:register";
         }
     }
 
@@ -83,13 +83,11 @@ public class UserController {
                           RedirectAttributes attributes,
                           Model model) {
         log.info("Handling account request for user: {}", userDetails.getUsername());
-        Optional<User> optionalUser = userService.findByEmail(userDetails.getUsername());
-
-        if(optionalUser.isPresent()){
-            model.addAttribute("user", optionalUser.get());
+        try {
+            model.addAttribute("user", userService.findByEmail(userDetails.getUsername()));
             return "account";
-        } else {
-            log.warn("User {} not found", userDetails.getUsername());
+        } catch (UsernameNotFoundException e) {
+            log.error("User {} not found", userDetails.getUsername());
             attributes.addFlashAttribute("msg_code", "user_not_found");
             return "redirect:error";
         }
@@ -124,9 +122,10 @@ public class UserController {
                             RedirectAttributes attributes) {
         log.info("Blocking user with ID: {}", id);
 
-        if(userService.blockUser(id) != null) {
+        try {
+            userService.blockUser(id);
             return "redirect:users";
-        } else {
+        } catch (UsernameNotFoundException e){
             log.warn("User {} not found", id);
             attributes.addFlashAttribute("msg_code", "user_not_found");
             return "redirect:error";

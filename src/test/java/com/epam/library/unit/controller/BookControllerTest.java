@@ -23,13 +23,10 @@ public class BookControllerTest {
 
     @Mock
     private Model model;
-
     @Mock
     RedirectAttributes redirectAttributes;
-
     @Mock
     private BookService bookService;
-
     @InjectMocks
     private BookController controller;
 
@@ -61,7 +58,7 @@ public class BookControllerTest {
                 "", "", redirectAttributes, model);
 
         // Assert
-        assertEquals("redirect:/error", result);
+        assertEquals("redirect:error", result);
         Mockito.verify(redirectAttributes).addFlashAttribute("msg_code", "invalid_page");
         Mockito.verify(bookService).getBooks(Mockito.anyString(), Mockito.anyString(),
                 Mockito.anyInt(), Mockito.anyString(), Mockito.anyString());
@@ -77,7 +74,7 @@ public class BookControllerTest {
     }
 
     @Test
-    public void testAddBook() {
+    public void testAddBook() throws Exception {
         // Arrange
         Mockito.when(bookService.add(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
                 .thenReturn(new Book());
@@ -87,22 +84,22 @@ public class BookControllerTest {
                 redirectAttributes);
 
         // Assert
-        assertEquals("redirect:/books", result);
+        assertEquals("redirect:books", result);
         Mockito.verify(bookService).add(Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
     }
 
     @Test
-    public void testAddBookError() {
+    public void testAddBookError() throws Exception {
         // Arrange
         Mockito.when(bookService.add(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
-                .thenReturn(null);
+                .thenThrow(new Exception("Wrong input"));
 
         // Act
         String result = controller.addBook("Title", "Author", "2023",
                 redirectAttributes);
 
         // Assert
-        assertEquals("redirect:/error", result);
+        assertEquals("redirect:error", result);
         Mockito.verify(redirectAttributes).addFlashAttribute("msg_code", "invalid_input");
         Mockito.verify(bookService).add(Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
     }

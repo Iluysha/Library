@@ -79,10 +79,10 @@ public class SubscriptionController {
     public String orderBook(@AuthenticationPrincipal UserDetails userDetails,
                             @RequestParam("bookId") Integer id,
                             RedirectAttributes attributes) {
-        if(subscriptionService.orderBook(userDetails, id) != null) {
+        try {
+            subscriptionService.orderBook(userDetails, id);
             return "redirect:order";
-        } else {
-            log.warn("No book with id: {}", id);
+        } catch (Exception e) {
             attributes.addFlashAttribute("msg_code", "no_such_book");
             return "redirect:error";
         }
@@ -103,9 +103,10 @@ public class SubscriptionController {
                                       RedirectAttributes attributes) {
         log.info("Processing approve request for subscription id: {}", id);
 
-        if(subscriptionService.approveSubscription(id) != null) {
+        try {
+            subscriptionService.approveSubscription(id);
             return "redirect:subscriptions";
-        } else {
+        } catch (Exception e) {
             log.warn("Failed to approve subscription with id:  {}", id);
             attributes.addFlashAttribute("msg_code", "cant_approve");
             return "redirect:error";

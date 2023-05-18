@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Service class for managing subscriptions.
@@ -25,8 +24,7 @@ public class SubscriptionService {
     private final SubscriptionRepository repo;
     private final UserService userService;
     private final BookService bookService;
-
-    private final int dayFine = 10;
+    private static final int dayFine = 10;
 
     public SubscriptionService(SubscriptionRepository repo, UserService userService,
                                BookService bookService) {
@@ -49,11 +47,11 @@ public class SubscriptionService {
      * Finds a subscription by its ID.
      *
      * @param id The ID of the subscription to find.
-     * @return An optional containing the subscription if found, or empty optional otherwise.
+     * @return the subscription if found, or throws exception otherwise.
      */
-    public Optional<Subscription> findById(Integer id) {
+    public Subscription findById(Integer id) throws Exception {
         log.info("Finding subscription by id: {}", id);
-        return repo.findById(id);
+        return repo.findById(id).orElseThrow(() -> new Exception("Subscription not found: " + id));
     }
 
     /**
@@ -82,38 +80,37 @@ public class SubscriptionService {
      *
      * @param userDetails The details of the authenticated user.
      * @param id           The ID of the book to order.
-     * @return The created subscription if the order is successful, or null otherwise.
+     * @return The created subscription if the order is successful, or throws exception otherwise.
      */
     @Transactional
-    public Subscription orderBook(UserDetails userDetails, Integer id) {
+    public Subscription orderBook(UserDetails userDetails, Integer id) throws Exception {
         log.info("Order book id: {} for user: {}", id, userDetails.getUsername());
 
-        Optional<User> optionalUser = userService.findByEmail(userDetails.getUsername());
-        Optional<Book> optionalBook = bookService.findById(id);
+        try {
+            User user = userService.findByEmail(userDetails.getUsername());
+            Book book = bookService.findById(id);
 
-        if (optionalUser.isPresent() && optionalBook.isPresent()) {
-            User user = optionalUser.get();
-            Book book = optionalBook.get();
-
-            if (book.getAvailableCopies() > 0) {
-                book.setAvailableCopies(book.getAvailableCopies() - 1);
-
-                Subscription subscription = new Subscription(user, book);
-
-                save(subscription);
-                bookService.save(book);
-
-                log.info("Order placed successfully for user: {} and book: {}", user.getName(), book.getTitle());
-                return subscription;
-            } else {
+            if (book.getAvailableCopies() < 0) {
                 log.error("Failed to place order for user: {} and book: {}. No available copies.",
                         userDetails.getUsername(), id);
-                return null;
+                throw new Exception("Failed to place order for user: " + userDetails.getUsername() +
+                        " and book: " + id + ". No available copies.");
             }
-        } else {
+
+            book.setAvailableCopies(book.getAvailableCopies() - 1);
+
+            Subscription subscription = new Subscription(user, book);
+
+            save(subscription);
+            bookService.save(book);
+
+            log.info("Order placed successfully for user: {} and book: {}", user.getName(), book.getTitle());
+            return subscription;
+        } catch (Exception e) {
             log.error("Failed to place order for user: {} and book: {}. No such book.",
                     userDetails.getUsername(), id);
-            return null;
+            throw new Exception("Failed to place order for user: " + userDetails.getUsername() +
+                    " and book: " + id + ". No such book.");
         }
     }
 
@@ -121,14 +118,17 @@ public class SubscriptionService {
      * Approves a subscription by setting the approved flag and updating other attributes.
      *
      * @param id The ID of the subscription to approve.
-     * @return The approved subscription if successful, or null otherwise.
+     * @return The approved subscription if successful, or throws exception otherwise.
      */
     @Transactional
-    public Subscription approveSubscription(Integer id) {
-        Optional<Subscription> optionalSubscription = findById(id);
+    public Subscription approveSubscription(Integer id) throws Exception {
+        try {
+            Subscription subscription = findById(id);
 
-        if(optionalSubscription.isPresent() && !optionalSubscription.get().isApproved()) {
-            Subscription subscription = optionalSubscription.get();
+            if(subscription.isApproved()) {
+                throw new Exception("Failed to approve subscription with id: " + id);
+            }
+
             subscription.setApproved(true);
             subscription.setStartDate(LocalDate.now());
             subscription.setPeriod(60);
@@ -137,19 +137,10 @@ public class SubscriptionService {
 
             log.info("Subscription with id: {} successfully approved", id);
             return subscription;
-        } else {
+        } catch (Exception e) {
             log.error("Failed to approve subscription with id:  {}", id);
-            return null;
+            throw new Exception("Failed to approve subscription with id: " + id);
         }
-    }
-
-    /**
-     * Retrieves the fine amount per day.
-     *
-     * @return The fine amount per day.
-     */
-    public int getDayFine() {
-        return dayFine;
     }
 
     /**

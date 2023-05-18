@@ -17,7 +17,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 
@@ -46,7 +45,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void testRegisterUser() {
+    public void testRegisterUser() throws Exception {
         // Arrange
         String name = "John Doe";
         String email = "johndoe@example.com";
@@ -60,24 +59,25 @@ public class UserControllerTest {
         String actualViewName = controller.registerUser(name, email, password, attributes);
 
         // Assert
-        assertEquals("redirect:/login", actualViewName);
+        assertEquals("redirect:login", actualViewName);
         Mockito.verify(attributes).addFlashAttribute("signup", true);
     }
 
     @Test
-    public void testRegisterExistingUser() {
+    public void testRegisterExistingUser() throws Exception {
         // Arrange
         String name = "John Doe";
         String email = "johndoe@example.com";
         String password = "password123";
 
-        Mockito.when(userService.register(name, email, password)).thenReturn(null);
+        Mockito.when(userService.register(name, email, password))
+                .thenThrow(new Exception("Email " + email + " already registered"));
 
         // Act
         String actualViewName = controller.registerUser(name, email, password, attributes);
 
         // Assert
-        assertEquals("redirect:/register", actualViewName);
+        assertEquals("redirect:register", actualViewName);
         Mockito.verify(attributes).addFlashAttribute("error", true);
     }
 
@@ -95,7 +95,7 @@ public class UserControllerTest {
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().toString())
                 ));
 
-        Mockito.when(userService.findByEmail(email)).thenReturn(Optional.of(user));
+        Mockito.when(userService.findByEmail(email)).thenReturn(user);
 
         // Act
         String actualViewName = controller.account(userDetails, attributes, model);

@@ -94,7 +94,7 @@ public class SubscriptionControllerTest {
     }
 
     @Test
-    public void testOrderBook() {
+    public void testOrderBook() throws Exception {
         // Arrange
         User user = new User("John Doe", "johndoe@example.com", "password", User.Role.READER);
         UserDetails userDetails = new org.springframework.security.core.userdetails.User(
@@ -117,7 +117,7 @@ public class SubscriptionControllerTest {
     }
 
     @Test
-    public void testOrderBookError() {
+    public void testOrderBookError() throws Exception {
         // Arrange
         User user = new User("John Doe", "johndoe@example.com", "password", User.Role.READER);
         UserDetails userDetails = new org.springframework.security.core.userdetails.User(
@@ -129,7 +129,7 @@ public class SubscriptionControllerTest {
         String expectedViewName = "redirect:error";
         Integer bookId = 1;
 
-        Mockito.when(subscriptionService.orderBook(userDetails, bookId)).thenReturn(null);
+        Mockito.when(subscriptionService.orderBook(userDetails, bookId)).thenThrow(new Exception());
 
         // Act
         String actualViewName = controller.orderBook(userDetails, bookId, attributes);
@@ -140,7 +140,7 @@ public class SubscriptionControllerTest {
     }
 
     @Test
-    public void testApproveSubscription() {
+    public void testApproveSubscription() throws Exception {
         // Arrange
         String expectedViewName = "redirect:subscriptions";
         Integer subscriptionId = 1;
@@ -156,12 +156,13 @@ public class SubscriptionControllerTest {
     }
 
     @Test
-    public void testApproveSubscriptionError() {
+    public void testApproveSubscriptionError() throws Exception {
         // Arrange
         String expectedViewName = "redirect:error";
         Integer subscriptionId = 1;
 
-        Mockito.when(subscriptionService.approveSubscription(subscriptionId)).thenReturn(null);
+        Mockito.when(subscriptionService.approveSubscription(subscriptionId))
+                .thenThrow(new Exception("Failed to approve subscription with id: " + subscriptionId));
 
         // Act
         String actualViewName = controller.approveSubscription(subscriptionId, attributes);

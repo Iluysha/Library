@@ -43,15 +43,26 @@ public class BookService {
     }
 
     /**
+     * Retrieves a book by its ID.
+     *
+     * @param bookId the ID of the book
+     * @return the book if found, or throws exception otherwise.
+     */
+    public Book findById(Integer bookId) throws Exception {
+        log.info("Getting book by ID: {}", bookId);
+        return repo.findById(bookId).orElseThrow(() -> new Exception("Book " + bookId + " not found"));
+    }
+
+    /**
      * Adds a copy of the book or adds a new book if no copy exists.
      *
      * @param bookTitle        the title of the book
      * @param bookAuthor       the author of the book
      * @param publicationYear  the publication year of the book
-     * @return the added book or null if there was an error
+     * @return the added book or throws exception if there was an error
      */
     @Transactional
-    public Book add(String bookTitle, String bookAuthor, String publicationYear) {
+    public Book add(String bookTitle, String bookAuthor, String publicationYear) throws Exception {
         log.info("Adding a book. Title: {}, Author: {}, PublicationYear: {}",
                 bookTitle, bookAuthor, publicationYear);
 
@@ -78,7 +89,7 @@ public class BookService {
             }
         } catch (NumberFormatException e) {
             log.error("Wrong input: {}, {}, {}", bookTitle, bookAuthor, publicationYear);
-            return null;
+            throw new Exception("Wrong input");
         }
     }
 
@@ -90,7 +101,7 @@ public class BookService {
      * @param pageNo       the page number
      * @param sortField    the field to sort on (title or author)
      * @param sortOrder    the sort order (asc or desc)
-     * @return the paginated list of books or null if there was an error
+     * @return the paginated list of books or throws exception if there was an error
      */
     public Page<Book> getBooks(String searchQuery, String searchField, int pageNo, String sortField, String sortOrder) {
         log.info("Searching books. Query: {}, Field: {}, Page: {}, SortField: {}, SortOrder: {}",
@@ -101,7 +112,7 @@ public class BookService {
 
         if (pageNo < 1) {
             log.warn("Invalid page number: {}", pageNo);
-            return null;
+            throw new IllegalArgumentException("Invalid page number: " + pageNo);
         }
 
         Pageable pageable = PageRequest.of(pageNo - 1, pageSize, sort);
@@ -123,22 +134,11 @@ public class BookService {
 
         if (page.getTotalPages() != 0 && pageNo > page.getTotalPages()) {
             log.error("Invalid page number: {}", pageNo);
-            return null;
+            throw new IllegalArgumentException("Invalid page number: " + pageNo);
         } else {
             // If pages number is zero, return it
             return page;
         }
-    }
-
-    /**
-     * Retrieves a book by its ID.
-     *
-     * @param id the ID of the book
-     * @return the optional book
-     */
-    public Optional<Book> findById(Integer id) {
-        log.info("Getting book by ID: {}", id);
-        return repo.findById(id);
     }
 
     /**

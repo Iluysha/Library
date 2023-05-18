@@ -2,6 +2,8 @@ package com.epam.library.entity;
 
 import jakarta.persistence.*;
 
+import java.util.Objects;
+
 @Entity
 @Table(name="users")
 public class User {
@@ -19,7 +21,7 @@ public class User {
     @Column(length = 64, nullable = false)
     private String name;
 
-    @Column(length = 255, nullable = false, unique = true)
+    @Column(nullable = false, unique = true)
     private String email;
 
     @Column(length = 45, nullable = false)
@@ -80,10 +82,6 @@ public class User {
         return fine;
     }
 
-    public void setFine(long fine) {
-        this.fine = fine;
-    }
-
     public void addFine(long add) {
         fine += add;
     }
@@ -102,5 +100,19 @@ public class User {
 
     public void setBlocked(boolean blocked) {
         this.blocked = blocked;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return fine == user.fine && blocked == user.blocked && name.equals(user.name) &&
+                email.equals(user.email) && password.equals(user.password) && role == user.role;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, email, password, role, fine, blocked);
     }
 }

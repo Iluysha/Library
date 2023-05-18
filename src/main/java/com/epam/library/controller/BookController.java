@@ -49,9 +49,9 @@ public class BookController {
                         RedirectAttributes attributes,
                         Model model) {
 
-        Page<Book> page = bookService.getBooks(searchQuery, searchField, pageNo, sortField, sortOrder);
+        try {
+            Page<Book> page = bookService.getBooks(searchQuery, searchField, pageNo, sortField, sortOrder);
 
-        if(page != null) {
             model.addAttribute("books", page.getContent());
             model.addAttribute("pageNo", pageNo);
             model.addAttribute("totalPages", Math.max(1, page.getTotalPages()));
@@ -61,7 +61,7 @@ public class BookController {
             model.addAttribute("searchField", searchField);
 
             return "books";
-        } else {
+        } catch (IllegalArgumentException e) {
             attributes.addFlashAttribute("msg_code", "invalid_page");
             return "redirect:error";
         }
@@ -96,9 +96,10 @@ public class BookController {
                           @RequestParam("bookAuthor") String bookAuthor,
                           @RequestParam("publicationYear") String publicationYear,
                           RedirectAttributes attributes) {
-        if(bookService.add(bookTitle, bookAuthor, publicationYear) != null) {
+        try {
+            bookService.add(bookTitle, bookAuthor, publicationYear);
             return "redirect:books";
-        } else {
+        } catch (Exception e) {
             attributes.addFlashAttribute("msg_code", "invalid_input");
             return "redirect:error";
         }

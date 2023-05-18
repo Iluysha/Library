@@ -3,8 +3,8 @@ package com.epam.library.unit.service;
 import com.epam.library.entity.Book;
 import com.epam.library.repository.BookRepository;
 import com.epam.library.service.BookService;
+import org.junit.Assert;
 import org.junit.Test;
-import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -24,7 +24,6 @@ public class BookServiceTest {
 
     @Mock
     private BookRepository repo;
-
     @InjectMocks
     private BookService bookService;
 
@@ -45,16 +44,13 @@ public class BookServiceTest {
     }
 
     @Test
-    public void testAddNewBook() {
+    public void testAddNewBook() throws Exception {
         // Arrange
         String bookTitle = "The Lord of the Rings";
         String bookAuthor = "J.R.R. Tolkien";
         String publicationYear = "1954";
 
-        Book expectedBook = new Book();
-        expectedBook.setTitle(bookTitle);
-        expectedBook.setAuthor(bookAuthor);
-        expectedBook.setPublicationYear(Integer.parseInt(publicationYear));
+        Book expectedBook = new Book(bookTitle, bookAuthor, Integer.parseInt(publicationYear));
         expectedBook.setNumOfCopies(1);
         expectedBook.setAvailableCopies(1);
 
@@ -70,7 +66,7 @@ public class BookServiceTest {
     }
 
     @Test
-    public void testAddExistingBook() {
+    public void testAddExistingBook() throws Exception {
         // Arrange
         String bookTitle = "Existing Book";
         String bookAuthor = "Test Author";
@@ -185,7 +181,8 @@ public class BookServiceTest {
 
         Page<Book> expectedBooks = new PageImpl<>(Collections.emptyList());
 
-        Mockito.when(repo.findByTitleContaining(Mockito.eq(searchQuery), Mockito.any(Pageable.class))).thenReturn(expectedBooks);
+        Mockito.when(repo.findByTitleContaining(Mockito.eq(searchQuery), Mockito.any(Pageable.class)))
+                .thenReturn(expectedBooks);
 
         // Act
         Page<Book> actualBooks = bookService.getBooks(searchQuery, searchField, pageNo, sortField, sortOrder);
@@ -199,17 +196,13 @@ public class BookServiceTest {
         // Arrange
         String searchQuery = "The Lord of the Rings";
         String searchField = "title";
-        int pageNo = -1;
         String sortField = "author";
         String sortOrder = "asc";
-
-        Page<Book> expectedBooks = null;
-
-        // Act
-        Page<Book> actualBooks = bookService.getBooks(searchQuery, searchField, pageNo, sortField, sortOrder);
+        int pageNo = -1;
 
         // Assert
-        assertEquals(expectedBooks, actualBooks);
+        Assert.assertThrows(Exception.class, () ->
+                bookService.getBooks(searchQuery, searchField, pageNo, sortField, sortOrder));
     }
 
     @Test
@@ -221,16 +214,12 @@ public class BookServiceTest {
         String sortField = "author";
         String sortOrder = "asc";
 
-        Page<Book> expectedBooks = null;
-
         Mockito.when(repo.findByTitleContaining(Mockito.eq(searchQuery), Mockito.any(Pageable.class)))
                 .thenReturn(new PageImpl<>(Collections.emptyList()));
 
-        // Act
-        Page<Book> actualBooks = bookService.getBooks(searchQuery, searchField, pageNo, sortField, sortOrder);
-
         // Assert
-        assertEquals(expectedBooks, actualBooks);
+        Assert.assertThrows(Exception.class, () ->
+                bookService.getBooks(searchQuery, searchField, pageNo, sortField, sortOrder));
     }
 
     @Test
@@ -254,7 +243,7 @@ public class BookServiceTest {
     }
 
     @Test
-    public void testGetById() {
+    public void testGetById() throws Exception {
         // Arrange
         Integer id = 1;
         Book expectedBook = new Book("The Lord of the Rings", "J.R.R. Tolkien", 1954);
@@ -265,11 +254,10 @@ public class BookServiceTest {
         Mockito.when(repo.findById(id)).thenReturn(Optional.of(expectedBook));
 
         // Act
-        Optional<Book> actualBook = bookService.findById(id);
+        Book foundBook = bookService.findById(id);
 
         // Assert
-        Assertions.assertTrue(actualBook.isPresent());
-        assertEquals(expectedBook, actualBook.get());
+        assertEquals(expectedBook, foundBook);
     }
 
     @Test

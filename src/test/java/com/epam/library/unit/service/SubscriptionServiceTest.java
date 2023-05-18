@@ -28,45 +28,40 @@ public class SubscriptionServiceTest {
 
     @Mock
     private SubscriptionRepository repo;
-
     @Mock
     private UserService userService;
-
     @Mock
     private BookService bookService;
-
     @InjectMocks
     private SubscriptionService subscriptionService;
 
     @Test
-    public void testSave() {
+    public void testSave() throws Exception {
         // Arrange
         Subscription subscription = new Subscription();
         Mockito.when(repo.findById(Mockito.any())).thenReturn(Optional.of(subscription));
 
         // Act
         subscriptionService.save(subscription);
-        Optional<Subscription> savedSubscription = subscriptionService.findById(subscription.getId());
+        Subscription savedSubscription = subscriptionService.findById(subscription.getId());
 
         // Assert
-        assertTrue(savedSubscription.isPresent());
-        assertEquals(subscription, savedSubscription.get());
+        assertEquals(subscription, savedSubscription);
         Mockito.verify(repo, Mockito.times(1)).save(subscription);
     }
 
     @Test
-    public void testFindById() {
+    public void testFindById() throws Exception {
         // Arrange
         Subscription subscription = new Subscription();
 
         Mockito.when(repo.findById(Mockito.any())).thenReturn(Optional.of(subscription));
 
         // Act
-        Optional<Subscription> foundSubscription = subscriptionService.findById(subscription.getId());
+        Subscription foundSubscription = subscriptionService.findById(subscription.getId());
 
         // Assert
-        assertTrue(foundSubscription.isPresent());
-        assertEquals(subscription, foundSubscription.get());
+        assertEquals(subscription, foundSubscription);
     }
 
     @Test
@@ -101,7 +96,7 @@ public class SubscriptionServiceTest {
     }
 
     @Test
-    public void testOrderBook() {
+    public void testOrderBook() throws Exception {
         // Arrange
         User user = new User("John Doe", "johndoe@example.com", "password", User.Role.READER);
         int bookId = 10;
@@ -113,8 +108,8 @@ public class SubscriptionServiceTest {
         Subscription subscription = new Subscription(user, updatedBook);
 
         Mockito.when(repo.findById(Mockito.any())).thenReturn(Optional.of(subscription));
-        Mockito.when(bookService.findById(Mockito.any())).thenReturn(Optional.of(book));
-        Mockito.when(userService.findByEmail(Mockito.any())).thenReturn(Optional.of(user));
+        Mockito.when(bookService.findById(Mockito.any())).thenReturn(book);
+        Mockito.when(userService.findByEmail(Mockito.any())).thenReturn(user);
 
         // Act
         GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + user.getRole().toString());
@@ -124,21 +119,20 @@ public class SubscriptionServiceTest {
                 Collections.singletonList(authority)
         ), bookId);
 
-        Optional<Subscription> foundSubscription = subscriptionService.findById(subscription.getId());
+        Subscription foundSubscription = subscriptionService.findById(subscription.getId());
 
         // Assert
-        assertTrue(foundSubscription.isPresent());
-        assertEquals(subscription, foundSubscription.get());
+        assertEquals(subscription, foundSubscription);
 
-        User subscriptionUser = foundSubscription.get().getUser();
-        Book subscriptionBook = foundSubscription.get().getBook();
+        User subscriptionUser = foundSubscription.getUser();
+        Book subscriptionBook = foundSubscription.getBook();
 
         assertEquals(user, subscriptionUser);
         assertEquals(updatedBook.getAvailableCopies(), subscriptionBook.getAvailableCopies());
     }
 
     @Test
-    public void testApproveSubscription() {
+    public void testApproveSubscription() throws Exception {
         // Arrange
         Subscription subscription = new Subscription();
         subscription.setApproved(false);

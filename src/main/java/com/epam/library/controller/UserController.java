@@ -83,6 +83,7 @@ public class UserController {
                           RedirectAttributes attributes,
                           Model model) {
         log.info("Handling account request for user: {}", userDetails.getUsername());
+
         try {
             model.addAttribute("user", userService.findByEmail(userDetails.getUsername()));
             return "account";
@@ -120,13 +121,10 @@ public class UserController {
     @PostMapping("/block")
     public String blockUser(@RequestParam("userId") Integer id,
                             RedirectAttributes attributes) {
-        log.info("Blocking user with ID: {}", id);
-
         try {
             userService.blockUser(id);
             return "redirect:users";
         } catch (UsernameNotFoundException e){
-            log.warn("User {} not found", id);
             attributes.addFlashAttribute("msg_code", "user_not_found");
             return "redirect:error";
         }

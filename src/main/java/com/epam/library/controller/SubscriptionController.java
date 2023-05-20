@@ -40,16 +40,14 @@ public class SubscriptionController {
         log.info("Handling subscriptions request for user: {}", userDetails.getUsername());
 
         if(userDetails.getAuthorities().stream().anyMatch(authority ->
-                authority.getAuthority().equals("ROLE_LIBRARIAN") ||
-                        authority.getAuthority().equals("ROLE_ADMIN"))) {
-            model.addAttribute("subscriptions",
-                    subscriptionService.findAll());
-            return "librarian_subscriptions";
-        } else {
+                authority.getAuthority().equals("ROLE_READER"))) {
             model.addAttribute("subscriptions",
                     subscriptionService.findByUserEmail(userDetails.getUsername()));
             return "reader_subscriptions";
         }
+
+        model.addAttribute("subscriptions", subscriptionService.findAll());
+        return "librarian_subscriptions";
     }
 
     /**
@@ -71,16 +69,16 @@ public class SubscriptionController {
      * Otherwise, redirects to the "error" page with a flash attribute indicating the failure reason.
      *
      * @param userDetails The UserDetails of the logged-in user.
-     * @param id           The ID of the book to order.
+     * @param bookId           The ID of the book to order.
      * @param attributes   RedirectAttributes for adding flash attributes.
      * @return The view name for redirection.
      */
     @PostMapping("/order")
     public String orderBook(@AuthenticationPrincipal UserDetails userDetails,
-                            @RequestParam("bookId") Integer id,
+                            @RequestParam("bookId") Integer bookId,
                             RedirectAttributes attributes) {
         try {
-            subscriptionService.orderBook(userDetails, id);
+            subscriptionService.orderBook(userDetails, bookId);
             return "redirect:order";
         } catch (Exception e) {
             attributes.addFlashAttribute("msg_code", "no_such_book");
@@ -94,20 +92,17 @@ public class SubscriptionController {
      * If the subscription is approved successfully, redirects to the "subscriptions" page.
      * Otherwise, redirects to the "error" page with a flash attribute indicating the failure reason.
      *
-     * @param id          The ID of the subscription to approve.
+     * @param subscriptionId          The ID of the subscription to approve.
      * @param attributes  RedirectAttributes for adding flash attributes.
      * @return The view name for redirection.
      */
     @PostMapping("/approve")
-    public String approveSubscription(@RequestParam("subscriptionId") Integer id,
+    public String approveSubscription(@RequestParam("subscriptionId") Integer subscriptionId,
                                       RedirectAttributes attributes) {
-        log.info("Processing approve request for subscription id: {}", id);
-
         try {
-            subscriptionService.approveSubscription(id);
+            subscriptionService.approveSubscription(subscriptionId);
             return "redirect:subscriptions";
         } catch (Exception e) {
-            log.warn("Failed to approve subscription with id:  {}", id);
             attributes.addFlashAttribute("msg_code", "cant_approve");
             return "redirect:error";
         }

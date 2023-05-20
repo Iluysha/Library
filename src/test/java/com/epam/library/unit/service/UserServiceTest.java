@@ -96,7 +96,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testRegisterUser_alreadyRegistered() throws Exception {
+    public void testRegisterUser_alreadyRegistered() {
         // Arrange
         String name = "John Doe";
         String email = "johndoe@example.com";

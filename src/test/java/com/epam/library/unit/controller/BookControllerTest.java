@@ -51,7 +51,7 @@ public class BookControllerTest {
     public void testBooksError() {
         // Arrange
         Mockito.when(bookService.getBooks(Mockito.anyString(), Mockito.anyString(), Mockito.anyInt(),
-                Mockito.anyString(), Mockito.anyString())).thenReturn(null);
+                Mockito.anyString(), Mockito.anyString())).thenThrow(new IllegalArgumentException());
 
         // Act
         String result = controller.books(1, "title", "asc",
@@ -89,10 +89,10 @@ public class BookControllerTest {
     }
 
     @Test
-    public void testAddBookError() throws Exception {
+    public void testAddBook_Error() throws Exception {
         // Arrange
         Mockito.when(bookService.add(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
-                .thenThrow(new Exception("Wrong input"));
+                .thenThrow(new Exception());
 
         // Act
         String result = controller.addBook("Title", "Author", "2023",
@@ -101,6 +101,64 @@ public class BookControllerTest {
         // Assert
         assertEquals("redirect:error", result);
         Mockito.verify(redirectAttributes).addFlashAttribute("msg_code", "invalid_input");
-        Mockito.verify(bookService).add(Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
+    }
+
+    @Test
+    public void testEditBookPage() throws Exception {
+        // Assert
+        int bookId = 10;
+
+        Mockito.when(bookService.findById(bookId)).thenReturn(new Book());
+
+        // Act
+        String result = controller.editBookPage(bookId, redirectAttributes, model);
+
+        // Assert
+        assertEquals("edit-book", result);
+    }
+
+    @Test
+    public void testEditBookPage_Error() throws Exception {
+        // Assert
+        int bookId = 10;
+
+        Mockito.when(bookService.findById(bookId)).thenThrow(new Exception());
+
+        // Act
+        String result = controller.editBookPage(bookId, redirectAttributes, model);
+
+        // Assert
+        assertEquals("redirect:error", result);
+        Mockito.verify(redirectAttributes).addFlashAttribute("msg_code", "invalid_input");
+    }
+
+    @Test
+    public void testEditBook() throws Exception {
+        // Act
+        String result = controller.editBook(1, "Title", "Author", "2023",
+                redirectAttributes);
+
+        // Assert
+        assertEquals("redirect:books", result);
+        Mockito.verify(bookService).edit(1, "Title", "Author", "2023");
+    }
+
+    @Test
+    public void testEditBook_Error() throws Exception {
+        // Arrange
+        Book book = new Book("Title", "Author", 2023);
+        int bookId = 10;
+
+        Mockito.when(bookService.edit(bookId, book.getTitle(),
+                        book.getAuthor(), book.getPublicationYear().toString()))
+                .thenThrow(new Exception());
+
+        // Act
+        String result = controller.editBook(bookId, book.getTitle(), book.getAuthor(),
+                book.getPublicationYear().toString(), redirectAttributes);
+
+        // Assert
+        assertEquals("redirect:error", result);
+        Mockito.verify(redirectAttributes).addFlashAttribute("msg_code", "invalid_input");
     }
 }

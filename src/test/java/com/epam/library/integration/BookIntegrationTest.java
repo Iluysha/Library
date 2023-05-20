@@ -23,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @AutoConfigureMockMvc
 @TestPropertySource(locations = "classpath:application_integration.properties")
-public class BookControllerIT {
+public class BookIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;

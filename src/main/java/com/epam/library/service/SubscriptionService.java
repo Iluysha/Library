@@ -86,32 +86,34 @@ public class SubscriptionService {
     public Subscription orderBook(UserDetails userDetails, Integer id) throws Exception {
         log.info("Order book id: {} for user: {}", id, userDetails.getUsername());
 
+        User user;
+        Book book;
+
         try {
-            User user = userService.findByEmail(userDetails.getUsername());
-            Book book = bookService.findById(id);
-
-            if (book.getAvailableCopies() < 0) {
-                log.error("Failed to place order for user: {} and book: {}. No available copies.",
-                        userDetails.getUsername(), id);
-                throw new Exception("Failed to place order for user: " + userDetails.getUsername() +
-                        " and book: " + id + ". No available copies.");
-            }
-
-            book.setAvailableCopies(book.getAvailableCopies() - 1);
-
-            Subscription subscription = new Subscription(user, book);
-
-            save(subscription);
-            bookService.save(book);
-
-            log.info("Order placed successfully for user: {} and book: {}", user.getName(), book.getTitle());
-            return subscription;
+            user = userService.findByEmail(userDetails.getUsername());
+            book = bookService.findById(id);
         } catch (Exception e) {
             log.error("Failed to place order for user: {} and book: {}. No such book.",
                     userDetails.getUsername(), id);
-            throw new Exception("Failed to place order for user: " + userDetails.getUsername() +
-                    " and book: " + id + ". No such book.");
+            throw e;
         }
+
+        if (book.getAvailableCopies() < 0) {
+            log.error("Failed to place order for user: {} and book: {}. No available copies.",
+                        userDetails.getUsername(), id);
+            throw new Exception("Failed to place order for user: " + userDetails.getUsername() +
+                        " and book: " + id + ". No available copies.");
+        }
+
+        book.setAvailableCopies(book.getAvailableCopies() - 1);
+
+        Subscription subscription = new Subscription(user, book);
+
+        save(subscription);
+        bookService.save(book);
+
+        log.info("Order placed successfully for user: {} and book: {}", user.getName(), book.getTitle());
+        return subscription;
     }
 
     /**
@@ -122,25 +124,30 @@ public class SubscriptionService {
      */
     @Transactional
     public Subscription approveSubscription(Integer id) throws Exception {
+        log.info("Approve subscription with id: {}", id);
+
+        Subscription subscription;
+
         try {
-            Subscription subscription = findById(id);
-
-            if(subscription.isApproved()) {
-                throw new Exception("Failed to approve subscription with id: " + id);
-            }
-
-            subscription.setApproved(true);
-            subscription.setStartDate(LocalDate.now());
-            subscription.setPeriod(60);
-            subscription.setFine(0);
-            save(subscription);
-
-            log.info("Subscription with id: {} successfully approved", id);
-            return subscription;
+            subscription = findById(id);
         } catch (Exception e) {
             log.error("Failed to approve subscription with id:  {}", id);
             throw new Exception("Failed to approve subscription with id: " + id);
         }
+
+        if(subscription.isApproved()) {
+            log.warn("Failed to approve subscription with id:  {}", id);
+            throw new Exception("Failed to approve subscription with id: " + id);
+        }
+
+        subscription.setApproved(true);
+        subscription.setStartDate(LocalDate.now());
+        subscription.setPeriod(60);
+        subscription.setFine(0);
+        save(subscription);
+
+        log.info("Subscription with id: {} successfully approved", id);
+        return subscription;
     }
 
     /**

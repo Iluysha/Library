@@ -101,4 +101,17 @@ public class Subscription {
             user.addFine(dayFine);
         }
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Subscription that = (Subscription) o;
+        return user.equals(that.user) && book.equals(that.book);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(user, book);
+    }
 }

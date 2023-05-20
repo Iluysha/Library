@@ -3,9 +3,9 @@ package com.epam.library.unit.service;
 import com.epam.library.entity.Book;
 import com.epam.library.repository.BookRepository;
 import com.epam.library.service.BookService;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -66,7 +67,7 @@ public class BookServiceTest {
     }
 
     @Test
-    public void testAddExistingBook() throws Exception {
+    public void testAddBook_ExistingBook() throws Exception {
         // Arrange
         String bookTitle = "Existing Book";
         String bookAuthor = "Test Author";
@@ -88,8 +89,89 @@ public class BookServiceTest {
         assertEquals(2, addedCopy.getNumOfCopies());
         assertEquals(2, addedCopy.getAvailableCopies());
 
-        Mockito.verify(repo, Mockito.times(1)).findByTitleAndAuthorAndPublicationYear(bookTitle, bookAuthor, Integer.parseInt(publicationYear));
+        Mockito.verify(repo, Mockito.times(1))
+                .findByTitleAndAuthorAndPublicationYear(bookTitle, bookAuthor, Integer.parseInt(publicationYear));
         Mockito.verify(repo, Mockito.times(1)).save(Mockito.any(Book.class));
+    }
+
+    @Test
+    public void testAddBook_InvalidPublicationYear() {
+        // Arrange
+        String bookTitle = "New Title";
+        String bookAuthor = "New Author";
+        String publicationYear = "InvalidYear";
+
+        // Act and Assert
+        assertThrows(Exception.class, () -> bookService.add(bookTitle, bookAuthor, publicationYear));
+    }
+
+    @Test
+    public void testEditBook() throws Exception {
+        // Arrange
+        Integer bookId = 1;
+        String bookTitle = "New Title";
+        String bookAuthor = "New Author";
+        String publicationYear = "2022";
+
+        Book book = new Book();
+        book.setId(bookId);
+
+        Mockito.when(repo.findByTitleAndAuthorAndPublicationYear(
+                        bookTitle, bookAuthor, Integer.parseInt(publicationYear)))
+                .thenReturn(Optional.empty());
+        Mockito.when(repo.findById(bookId)).thenReturn(Optional.of(book));
+        Mockito.when(repo.save(ArgumentMatchers.any(Book.class))).thenReturn(Optional.of(book));
+
+        // Act
+        bookService.edit(bookId, bookTitle, bookAuthor, publicationYear);
+
+        // Assert
+        Mockito.verify(repo).findByTitleAndAuthorAndPublicationYear(
+                bookTitle, bookAuthor, Integer.parseInt(publicationYear));
+        Mockito.verify(repo).findById(bookId);
+        Mockito.verify(repo).save(book);
+    }
+
+    @Test
+    public void testEditBook_BookAlreadyExists() {
+        // Arrange
+        Integer bookId = 1;
+        String bookTitle = "Existing Title";
+        String bookAuthor = "Existing Author";
+        String publicationYear = "2022";
+
+        Mockito.when(repo.findByTitleAndAuthorAndPublicationYear(
+                        bookTitle, bookAuthor, Integer.parseInt(publicationYear)))
+                .thenReturn(Optional.of(new Book()));
+
+        // Act and Assert
+        assertThrows(Exception.class, () -> bookService.edit(bookId, bookTitle, bookAuthor, publicationYear));
+    }
+
+    @Test
+    public void testEditBook_BookNotFound() {
+        // Arrange
+        Integer bookId = 1;
+        String bookTitle = "New Title";
+        String bookAuthor = "New Author";
+        String publicationYear = "2022";
+
+        Mockito.when(repo.findById(bookId)).thenReturn(Optional.empty());
+
+        // Act and Assert
+        assertThrows(Exception.class, () -> bookService.edit(bookId, bookTitle, bookAuthor, publicationYear));
+    }
+
+    @Test
+    public void testEditBook_InvalidPublicationYear() {
+        // Arrange
+        Integer bookId = 1;
+        String bookTitle = "New Title";
+        String bookAuthor = "New Author";
+        String publicationYear = "InvalidYear";
+
+        // Act and Assert
+        assertThrows(Exception.class, () -> bookService.edit(bookId, bookTitle, bookAuthor, publicationYear));
     }
 
     @Test
@@ -201,7 +283,7 @@ public class BookServiceTest {
         int pageNo = -1;
 
         // Assert
-        Assert.assertThrows(Exception.class, () ->
+        assertThrows(Exception.class, () ->
                 bookService.getBooks(searchQuery, searchField, pageNo, sortField, sortOrder));
     }
 
@@ -218,7 +300,7 @@ public class BookServiceTest {
                 .thenReturn(new PageImpl<>(Collections.emptyList()));
 
         // Assert
-        Assert.assertThrows(Exception.class, () ->
+        assertThrows(Exception.class, () ->
                 bookService.getBooks(searchQuery, searchField, pageNo, sortField, sortOrder));
     }
 

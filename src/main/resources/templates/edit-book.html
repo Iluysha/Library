@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Library</title>
+    <link rel="icon" href="/img/icon.png" type="image/png">
+
+    <link th:href="@{/css/styles.css}" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+          crossorigin="anonymous">
+</head>
+
+<body>
+<nav class="navbar navbar-default navbar-expand-lg bg-light">
+    <div class="container-fluid">
+        <ul class="nav navbar-nav">
+            <li><a class="nav-link active bg-gray" href="/books" th:text="#{library}">Library</a></li>
+            <li><a class="nav-link active" href="/books" th:text="#{books}">Books</a></li>
+            <li><a class="nav-link active" href="/subscriptions" th:text="#{subscriptions}">Subscriptions</a></li>
+            <li th:if="${#authorization.expression('hasAuthority(''ROLE_ADMIN'')')}">
+                <a class="nav-link active" href="/users" th:text="#{users}">Users</a>
+            </li>
+            <li><a class="nav-link active" href="/account" th:text="#{account}">Account</a></li>
+        </ul>
+        <ul class="nav navbar-nav ml-auto">
+            <li><a class="nav-link active bg-gray ml-auto"
+                   th:href="'?lang='+#{lang_code}" th:text="#{lang}"></a>
+            </li>
+            <li><a class="nav-link active" sec:authorize="!isAuthenticated()" href="/login"
+                   th:text="#{login}">Login</a>
+            </li>
+            <li><a class="nav-link active" sec:authorize="isAuthenticated()" href="/logout"
+                   th:text="#{logout}">Logout</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<form method="POST" th:action="@{'/edit-book?bookId=' + ${book.getId()}}" class="m-4">
+    <div class="my-2">
+        <label for="bookTitle" th:text="#{title} + ':'">Title:</label>
+        <input id="bookTitle" type="text" name="bookTitle"
+               th:value="${book.getTitle()}" th:placeholder="${book.getTitle()}"/>
+    </div>
+    <div class="my-2">
+        <label for="bookAuthor" th:text="#{author} + ':'">Author:</label>
+        <input id="bookAuthor" type="text" name="bookAuthor"
+               th:value="${book.getAuthor()}" th:placeholder="${book.getAuthor()}"/>
+    </div>
+    <div class="my-2">
+        <label for="publicationYear" th:text="#{publication_year} + ':'">Publication year:</label>
+        <input id="publicationYear" type="text" pattern="(18|19|20)\d{2}" name="publicationYear"
+               th:value="${book.getPublicationYear()}" th:placeholder="${book.getPublicationYear()}"/>
+    </div>
+    <button type="submit" class="btn btn-primary my-2" th:text="#{edit_book}">Edit</button>
+</form>
+</body>
+</html>

@@ -27,7 +27,7 @@ import static org.junit.Assert.*;
 public class SubscriptionServiceTest {
 
     @Mock
-    private SubscriptionRepository repo;
+    private SubscriptionRepository subscriptionRepo;
     @Mock
     private UserService userService;
     @Mock
@@ -39,7 +39,7 @@ public class SubscriptionServiceTest {
     public void testSave() throws Exception {
         // Arrange
         Subscription subscription = new Subscription();
-        Mockito.when(repo.findById(Mockito.any())).thenReturn(Optional.of(subscription));
+        Mockito.when(subscriptionRepo.findById(Mockito.any())).thenReturn(Optional.of(subscription));
 
         // Act
         subscriptionService.save(subscription);
@@ -47,7 +47,7 @@ public class SubscriptionServiceTest {
 
         // Assert
         assertEquals(subscription, savedSubscription);
-        Mockito.verify(repo, Mockito.times(1)).save(subscription);
+        Mockito.verify(subscriptionRepo, Mockito.times(1)).save(subscription);
     }
 
     @Test
@@ -55,7 +55,7 @@ public class SubscriptionServiceTest {
         // Arrange
         Subscription subscription = new Subscription();
 
-        Mockito.when(repo.findById(Mockito.any())).thenReturn(Optional.of(subscription));
+        Mockito.when(subscriptionRepo.findById(Mockito.any())).thenReturn(Optional.of(subscription));
 
         // Act
         Subscription foundSubscription = subscriptionService.findById(subscription.getId());
@@ -72,7 +72,7 @@ public class SubscriptionServiceTest {
         Subscription subscription = new Subscription(user, book);
         subscription.setUser(user);
 
-        Mockito.when(repo.findByUserEmail(user.getEmail())).thenReturn(List.of(subscription));
+        Mockito.when(subscriptionRepo.findByUserEmail(user.getEmail())).thenReturn(List.of(subscription));
 
         // Act
         List<Subscription> foundSubscriptions = subscriptionService.findByUserEmail(user.getEmail());
@@ -86,7 +86,7 @@ public class SubscriptionServiceTest {
         // Arrange
         Subscription subscription = new Subscription();
 
-        Mockito.when(repo.findAll()).thenReturn(List.of(subscription));
+        Mockito.when(subscriptionRepo.findAll()).thenReturn(List.of(subscription));
 
         // Act
         List<Subscription> foundSubscriptions = subscriptionService.findAll();
@@ -107,28 +107,40 @@ public class SubscriptionServiceTest {
         updatedBook.setAvailableCopies(availableCopies - 1);
         Subscription subscription = new Subscription(user, updatedBook);
 
-        Mockito.when(repo.findById(Mockito.any())).thenReturn(Optional.of(subscription));
-        Mockito.when(bookService.findById(Mockito.any())).thenReturn(book);
-        Mockito.when(userService.findByEmail(Mockito.any())).thenReturn(user);
+        Mockito.when(bookService.findById(bookId)).thenReturn(book);
+        Mockito.when(userService.findByEmail(user.getEmail())).thenReturn(user);
 
         // Act
         GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + user.getRole().toString());
-        subscriptionService.orderBook(new org.springframework.security.core.userdetails.User(
+        Subscription newSubscription = subscriptionService.orderBook(new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
                 user.getPassword(),
                 Collections.singletonList(authority)
         ), bookId);
 
-        Subscription foundSubscription = subscriptionService.findById(subscription.getId());
+        // Assert
+        assertEquals(subscription, newSubscription);
+        assertEquals(user, newSubscription.getUser());
+        assertEquals(updatedBook, newSubscription.getBook());
+    }
+
+    @Test
+    public void testOrderBook_BookNotFound() throws Exception {
+        // Arrange
+        User user = new User("John Doe", "johndoe@example.com", "password", User.Role.READER);
+        int bookId = 10;
+
+        Mockito.when(bookService.findById(bookId)).thenThrow(new Exception());
+        Mockito.when(userService.findByEmail(user.getEmail())).thenReturn(new User());
 
         // Assert
-        assertEquals(subscription, foundSubscription);
-
-        User subscriptionUser = foundSubscription.getUser();
-        Book subscriptionBook = foundSubscription.getBook();
-
-        assertEquals(user, subscriptionUser);
-        assertEquals(updatedBook.getAvailableCopies(), subscriptionBook.getAvailableCopies());
+        GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + user.getRole().toString());
+        assertThrows(Exception.class, () -> subscriptionService.orderBook(
+                new org.springframework.security.core.userdetails.User(
+                        user.getEmail(),
+                        user.getPassword(),
+                        Collections.singletonList(authority)
+        ), bookId));
     }
 
     @Test
@@ -137,7 +149,7 @@ public class SubscriptionServiceTest {
         Subscription subscription = new Subscription();
         subscription.setApproved(false);
 
-        Mockito.when(repo.findById(Mockito.any())).thenReturn(Optional.of(subscription));
+        Mockito.when(subscriptionRepo.findById(Mockito.any())).thenReturn(Optional.of(subscription));
 
         // Save subscription
         subscriptionService.save(subscription);
@@ -160,7 +172,7 @@ public class SubscriptionServiceTest {
         Subscription subscription = new Subscription(user, book);
         subscription.setStartDate(LocalDate.now().minusDays(80));
 
-        Mockito.when(repo.findAll()).thenReturn(List.of(subscription));
+        Mockito.when(subscriptionRepo.findAll()).thenReturn(List.of(subscription));
 
         // Act
         subscriptionService.calculateAndAddFines();

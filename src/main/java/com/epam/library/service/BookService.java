@@ -11,7 +11,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -66,31 +65,73 @@ public class BookService {
         log.info("Adding a book. Title: {}, Author: {}, PublicationYear: {}",
                 bookTitle, bookAuthor, publicationYear);
 
+        int publicationYearInt;
+
         try {
-            Optional<Book> optionalBook = repo.findByTitleAndAuthorAndPublicationYear(bookTitle,
-                    bookAuthor, Integer.parseInt(publicationYear));
-
-            // Check if the book already exists
-            if(optionalBook.isPresent()) {
-                log.info("Adding a copy of the book: {}", bookTitle);
-
-                Book book = optionalBook.get();
-                book.addCopy();
-                repo.save(book);
-
-                return book;
-            } else {
-                log.info("Adding a new book: {}", bookTitle);
-
-                Book newBook = new Book(bookTitle, bookAuthor, Integer.parseInt(publicationYear));
-                repo.save(newBook);
-
-                return newBook;
-            }
+            publicationYearInt = Integer.parseInt(publicationYear);
         } catch (NumberFormatException e) {
-            log.error("Wrong input: {}, {}, {}", bookTitle, bookAuthor, publicationYear);
+            log.error("Wrong year input: {}", publicationYear);
             throw new Exception("Wrong input");
         }
+
+        Optional<Book> optionalBook = repo.findByTitleAndAuthorAndPublicationYear(bookTitle,
+                bookAuthor, publicationYearInt);
+
+        // Check if the book already exists
+        if(optionalBook.isPresent()) {
+            log.info("Adding a copy of the book: {}", bookTitle);
+
+            Book book = optionalBook.get();
+            book.addCopy();
+            repo.save(book);
+
+            return book;
+        }
+
+        log.info("Adding a new book: {}", bookTitle);
+
+        Book newBook = new Book(bookTitle, bookAuthor, publicationYearInt);
+        repo.save(newBook);
+
+        return newBook;
+    }
+
+    @Transactional
+    public Book edit(Integer bookId, String bookTitle, String bookAuthor, String publicationYear) throws Exception {
+        log.info("Editing a book. Title: {}, Author: {}, PublicationYear: {}",
+                bookTitle, bookAuthor, publicationYear);
+
+        int publicationYearInt;
+
+        try {
+            publicationYearInt = Integer.parseInt(publicationYear);
+        } catch (NumberFormatException e) {
+            log.error("Wrong year input: {}", publicationYear);
+            throw new Exception("Wrong input");
+        }
+
+        if(repo.findByTitleAndAuthorAndPublicationYear(bookTitle,
+                bookAuthor, publicationYearInt).isPresent()) {
+            log.error("Book already exists: {}, {}, {}", bookTitle, bookAuthor, publicationYear);
+            throw new Exception("Book already exists");
+        }
+
+        Book book;
+
+        try {
+            book = findById(bookId);
+        } catch (Exception e) {
+            log.error("Book not found with id: {}", bookId);
+            throw new Exception("Wrong input");
+        }
+
+        book.setTitle(bookTitle);
+        book.setAuthor(bookAuthor);
+        book.setPublicationYear(publicationYearInt);
+
+        repo.save(book);
+        log.info("The book is saved");
+        return book;
     }
 
     /**
@@ -119,8 +160,8 @@ public class BookService {
         Page<Book> page;
 
         // If search fields are empty, get all books
-        if (!searchField.equals("") && !searchQuery.equals("")) {
-            if(Objects.equals(searchField, "author")) {
+        if (!searchField.isBlank() && !searchQuery.isBlank()) {
+            if(searchField.equals("author")) {
                 log.info("Searching books by author");
                 page = repo.findByAuthorContaining(searchQuery, pageable);
             } else {
@@ -135,10 +176,9 @@ public class BookService {
         if (page.getTotalPages() != 0 && pageNo > page.getTotalPages()) {
             log.error("Invalid page number: {}", pageNo);
             throw new IllegalArgumentException("Invalid page number: " + pageNo);
-        } else {
-            // If pages number is zero, return it
-            return page;
         }
+
+        return page;
     }
 
     /**

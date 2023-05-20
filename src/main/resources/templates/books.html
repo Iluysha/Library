@@ -77,6 +77,8 @@
                 <th scope="col"><a href="?sortField=author" th:text="#{author}">Author</a></th>
                 <th scope="col"><a href="?sortField=publicationYear" th:text="#{publication_year}">Publication year</a></th>
                 <th scope="col" th:text="#{order}">Order</th>
+                <th th:if="${#authorization.expression('hasAuthority(''ROLE_ADMIN'')')}"
+                    scope="col" th:text="#{edit_book}">Edit</th>
             </tr>
             </thead>
 
@@ -91,6 +93,9 @@
                         <input type="hidden" name="bookId" th:value="${book.getId()}"/>
                         <button type="submit" class="btn btn-primary" th:text="#{order}">Order</button>
                     </form>
+                </td>
+                <td th:if="${#authorization.expression('hasAuthority(''ROLE_ADMIN'')')}">
+                    <a class="btn btn-primary" th:href="@{'/edit-book?bookId=' + ${book.getId()}}"  th:text="#{edit_book}">Edit</a>
                 </td>
             </tr>
             </tbody>

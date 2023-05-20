@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @AutoConfigureMockMvc
 @TestPropertySource(locations = "classpath:application_integration.properties")
-public class SubscriptionControllerIT {
+public class SubscriptionIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;

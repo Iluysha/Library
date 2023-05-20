@@ -104,4 +104,35 @@ public class BookController {
             return "redirect:error";
         }
     }
+
+    @GetMapping("/edit-book")
+    public String editBookPage(@RequestParam("bookId") Integer bookId,
+                               RedirectAttributes attributes,
+                               Model model) {
+        log.info("Received request for edit book {}", bookId);
+
+        try {
+            model.addAttribute("book", bookService.findById(bookId));
+            return "edit-book";
+        } catch (Exception e) {
+            attributes.addFlashAttribute("msg_code", "invalid_input");
+            return "redirect:error";
+        }
+    }
+
+    @PostMapping("/edit-book")
+    public String editBook(@RequestParam("bookId") Integer bookId,
+                           @RequestParam("bookTitle") String bookTitle,
+                           @RequestParam("bookAuthor") String bookAuthor,
+                           @RequestParam("publicationYear") String publicationYear,
+                           RedirectAttributes attributes) {
+        try {
+            bookService.edit(bookId, bookTitle, bookAuthor, publicationYear);
+            return "redirect:books";
+        } catch (Exception e) {
+            attributes.addFlashAttribute("msg_code", "invalid_input");
+            return "redirect:error";
+        }
+    }
+
 }

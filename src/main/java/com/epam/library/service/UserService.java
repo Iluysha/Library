@@ -77,12 +77,12 @@ public class UserService implements UserDetailsService {
         log.info("Registering user with email: {}", email);
 
         try {
-            findByEmail(email);
+            findByEmail(email); // Should throw UsernameNotFoundException if user doesn't exist
             log.warn("Email {} already registered", email);
             throw new Exception("Email " + email + " already registered");
         } catch (UsernameNotFoundException e) {
             if(!Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$").matcher(email).matches() ||
-                    name.equals("") && password.equals("")) {
+                    name.isBlank() && password.isBlank()) {
                 log.error("Wrong input: {}, {}, {}", name, email, password);
                 throw new Exception("Wrong input: " + name + email + password);
             }
@@ -114,6 +114,7 @@ public class UserService implements UserDetailsService {
      */
     @Transactional
     public User blockUser(Integer id) {
+        log.info("Blocking user with id: {}", id);
 
         try {
             User user = findById(id);

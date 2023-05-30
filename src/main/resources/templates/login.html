@@ -26,9 +26,9 @@
     </div>
 </nav>
 
-<h5 th:if="${param.error}" th:text="#{invalid_login}">Invalid username or password</h5>
-<h5 th:if="${param.logout}" th:text="#{logged_out}">You have been logged out</h5>
-<h5 th:if="${signup}" th:text="#{success_signup}">Registration successful. Please log in</h5>
+<h5 th:if="${param.error}" th:text="#{invalid_login}" class="m-4">Invalid username or password</h5>
+<h5 th:if="${param.logout}" th:text="#{logged_out}" class="m-4">You have been logged out</h5>
+<h5 th:if="${signup}" th:text="#{success_signup}" class="m-4">Registration successful. Please log in</h5>
 
 <form th:action="@{/login}" method="post" class="m-4">
     <div class="my-2">

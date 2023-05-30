@@ -26,10 +26,10 @@
     </div>
 </nav>
 
-<h5 th:if="${error}" th:text="#{registered_email}">Email already registered</h5>
+<h5 th:if="${error}" th:text="#{registered_email}" class="m-4">Email already registered</h5>
 
-<form th:action="@{/register}" method="post">
-    <div>
+<form th:action="@{/register}" method="post" class="m-4">
+    <div class="my-2">
         <label for="name" th:text="#{name}">Name:</label>
         <input type="text" id="name" name="name" required>
     </div>
@@ -42,10 +42,10 @@
         <input type="password" id="password" name="password" required>
     </div>
     <div>
-        <input type="submit" th:value="#{signup}">
+        <input type="submit" th:value="#{signup}" class="btn btn-primary my-2">
     </div>
 </form>
-<h5>Already have an account?</h5>
-<a href="/login" th:text="#{login}"></a>
+<h5 th:text="#{registered}" class="m-4">Already have an account?</h5>
+<a href="/login" th:text="#{login}" class="m-4"></a>
 </body>
 </html>

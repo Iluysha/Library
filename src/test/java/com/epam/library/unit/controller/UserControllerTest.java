@@ -11,6 +11,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -106,6 +107,28 @@ public class UserControllerTest {
     }
 
     @Test
+    public void testAccount_Error() {
+        // Arrange
+
+        User user = new User("John Doe", "johndoe@example.com", "password123", User.Role.READER);
+        UserDetails userDetails = new org.springframework.security.core.userdetails.User(
+                user.getEmail(),
+                user.getPassword(),
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().toString())
+                ));
+
+        Mockito.when(userService.findByEmail(userDetails.getUsername()))
+                .thenThrow(new UsernameNotFoundException("User not found"));
+
+        // Act
+        String actualViewName = controller.account(userDetails, attributes, model);
+
+        // Assert
+        assertEquals("redirect:error", actualViewName);
+        Mockito.verify(attributes).addFlashAttribute("msg_code", "user_not_found");
+    }
+
+    @Test
     public void testReaders() {
         // Arrange
         List<User> users = new ArrayList<>();
@@ -136,6 +159,22 @@ public class UserControllerTest {
 
         // Assert
         assertEquals("redirect:users", actualViewName);
+    }
+
+    @Test
+    public void testBlockUser_Error() {
+        // Arrange
+        Integer id = 1;
+
+        Mockito.when(userService.blockUser(id))
+                .thenThrow(new UsernameNotFoundException("User not found"));
+
+        // Act
+        String actualViewName = controller.blockUser(id, attributes);
+
+        // Assert
+        assertEquals("redirect:error", actualViewName);
+        Mockito.verify(attributes).addFlashAttribute("msg_code", "user_not_found");
     }
 }
 
